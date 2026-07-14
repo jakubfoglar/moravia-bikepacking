@@ -5,11 +5,11 @@
     android:orientation="horizontal"
     android:gravity="center_vertical"
     android:background="#FFFFFF"
-    android:padding="6dp">
+    android:padding="8dp">
 
     <FrameLayout
-        android:layout_width="46dp"
-        android:layout_height="46dp">
+        android:layout_width="52dp"
+        android:layout_height="52dp">
         <ImageView
             android:id="@+id/photo"
             android:layout_width="match_parent"
@@ -21,8 +21,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"
-            android:textSize="20sp"
-            android:background="#2e7d32"
+            android:textSize="22sp"
+            android:background="#2E7D32"
             android:visibility="gone" />
     </FrameLayout>
 
@@ -30,7 +30,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="10dp"
         android:orientation="vertical">
         <TextView
             android:id="@+id/name"
@@ -38,16 +38,17 @@
             android:layout_height="wrap_content"
             android:maxLines="1"
             android:ellipsize="end"
-            android:textColor="#15151A"
+            android:textColor="#14141A"
             android:textStyle="bold"
-            android:textSize="14sp"
+            android:textSize="15sp"
             android:text="Name" />
         <TextView
             android:id="@+id/dist"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="#333333"
-            android:textSize="13sp"
-            android:text="➜ — km" />
+            android:textColor="#14141A"
+            android:textStyle="bold"
+            android:textSize="14sp"
+            android:text="🌄 3.4 km" />
     </LinearLayout>
 </LinearLayout>

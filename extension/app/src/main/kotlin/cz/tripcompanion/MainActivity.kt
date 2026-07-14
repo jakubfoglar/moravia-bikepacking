@@ -21,7 +21,7 @@ class MainActivity : AppCompatActivity() {
         status = findViewById(R.id.status)
         logs = findViewById(R.id.logs)
         findViewById<TextView>(R.id.version).text =
-            "Installed: build ${BuildConfig.VERSION_CODE} (v${BuildConfig.VERSION_NAME})"
+            "Build ${BuildConfig.VERSION_CODE} · v${BuildConfig.VERSION_NAME}"
         findViewById<Button>(R.id.btn_update).setOnClickListener { checkForUpdate() }
         findViewById<Button>(R.id.btn_refresh).setOnClickListener { refreshLogs() }
         findViewById<Button>(R.id.btn_copy).setOnClickListener { copyLogs() }

@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="#FFFFFF"
-    android:padding="10dp">
+    android:padding="16dp">
 
     <TextView
         android:id="@+id/err_title"
@@ -20,8 +20,9 @@
         android:id="@+id/err_body"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:textColor="#333333"
-        android:textSize="12sp"
+        android:layout_marginTop="8dp"
+        android:textColor="#26262B"
+        android:textSize="13sp"
+        android:lineSpacingExtra="2dp"
         android:text="" />
 </LinearLayout>

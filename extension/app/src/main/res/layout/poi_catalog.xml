@@ -1,138 +1,223 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="#FFFFFF"
-    android:padding="10dp">
+    android:background="#FFFFFF">
 
     <LinearLayout
-        android:id="@+id/top"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="16dp">
 
-        <FrameLayout
-            android:layout_width="118dp"
-            android:layout_height="106dp">
-            <ImageView
-                android:id="@+id/photo"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:scaleType="centerCrop"
-                android:contentDescription="@null" />
-            <TextView
-                android:id="@+id/tile"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:textSize="40sp"
-                android:background="#2e7d32"
-                android:visibility="gone" />
-        </FrameLayout>
-
+        <!-- HEADER: photo + name block -->
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginStart="11dp"
-            android:orientation="vertical">
+            android:orientation="horizontal">
+
+            <FrameLayout
+                android:layout_width="120dp"
+                android:layout_height="120dp">
+                <ImageView
+                    android:id="@+id/photo"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:contentDescription="@null" />
+                <TextView
+                    android:id="@+id/tile"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:textSize="44sp"
+                    android:background="#2E7D32"
+                    android:visibility="gone" />
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="14dp"
+                android:orientation="vertical">
+                <TextView
+                    android:id="@+id/badge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/pill_history"
+                    android:textColor="#FFFFFF"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.06"
+                    android:paddingLeft="9dp"
+                    android:paddingRight="9dp"
+                    android:paddingTop="3dp"
+                    android:paddingBottom="3dp"
+                    android:text="HISTORY" />
+                <TextView
+                    android:id="@+id/name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:maxLines="2"
+                    android:ellipsize="end"
+                    android:textColor="#14141A"
+                    android:textSize="17sp"
+                    android:textStyle="bold"
+                    android:text="Name" />
+                <TextView
+                    android:id="@+id/sub"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:textColor="#5A5A60"
+                    android:textSize="12sp"
+                    android:text="Town · Day 1" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- DISTANCE band (located) -->
+        <LinearLayout
+            android:id="@+id/dist_band"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:orientation="horizontal">
             <TextView
-                android:id="@+id/badge"
+                android:id="@+id/dist_num"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="#6a1b9a"
+                android:textColor="#14141A"
+                android:textSize="30sp"
+                android:textStyle="bold"
+                android:text="3.4" />
+            <TextView
+                android:id="@+id/dist_unit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="3dp"
+                android:layout_marginBottom="3dp"
+                android:layout_gravity="bottom"
+                android:textColor="#5A5A60"
+                android:textSize="14sp"
+                android:text="km" />
+        </LinearLayout>
+
+        <!-- GPS band (not located) -->
+        <LinearLayout
+            android:id="@+id/gps_band"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:visibility="gone">
+            <ProgressBar
+                android:id="@+id/gps_spinner"
+                android:layout_width="16dp"
+                android:layout_height="16dp" />
+            <TextView
+                android:id="@+id/gps_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:textColor="#5A5A60"
+                android:textSize="15sp"
+                android:text="finding GPS…" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/divider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp"
+            android:text=""
+            android:background="#E6E6E9" />
+
+        <TextView
+            android:id="@+id/hook"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:textColor="#26262B"
+            android:textSize="15sp"
+            android:text="Why stop here" />
+
+        <TextView
+            android:id="@+id/more"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textColor="#6A1B9A"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:text="Full story ›" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:text="" />
+
+        <!-- NAV -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+            <TextView
+                android:id="@+id/btn_prev"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/btn_ghost"
+                android:textColor="#14141A"
+                android:textStyle="bold"
+                android:textSize="15sp"
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp"
+                android:paddingTop="14dp"
+                android:paddingBottom="14dp"
+                android:text="‹ Prev" />
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center">
+                <TextView
+                    android:id="@+id/cnt_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#5A5A60"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.06"
+                    android:text="NEAREST AHEAD" />
+                <TextView
+                    android:id="@+id/cnt_value"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#14141A"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:text="5 / 79" />
+            </LinearLayout>
+            <TextView
+                android:id="@+id/btn_next"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/btn_primary"
                 android:textColor="#FFFFFF"
-                android:textSize="11sp"
                 android:textStyle="bold"
-                android:paddingLeft="8dp"
-                android:paddingRight="8dp"
-                android:paddingTop="2dp"
-                android:paddingBottom="2dp"
-                android:text="NATURE" />
-            <TextView
-                android:id="@+id/name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:textColor="#15151A"
-                android:textSize="19sp"
-                android:textStyle="bold"
-                android:text="Name" />
-            <TextView
-                android:id="@+id/sub"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:textColor="#777777"
-                android:textSize="12sp"
-                android:text="Town · Day 1" />
-            <TextView
-                android:id="@+id/dist"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:textColor="#15151A"
-                android:textSize="22sp"
-                android:textStyle="bold"
-                android:text="➜ — km" />
+                android:textSize="15sp"
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp"
+                android:paddingTop="14dp"
+                android:paddingBottom="14dp"
+                android:text="Next ›" />
         </LinearLayout>
     </LinearLayout>
-
-    <!-- Divider: a 1dp TextView, because RemoteViews does not allow a bare <View>. -->
-    <TextView
-        android:id="@+id/divider"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="8dp"
-        android:text=""
-        android:background="#ECECEE" />
-
-    <TextView
-        android:id="@+id/blurb"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:textColor="#333333"
-        android:textSize="14sp"
-        android:lineSpacingExtra="2dp"
-        android:text="Blurb" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:paddingTop="6dp">
-        <TextView
-            android:id="@+id/btn_prev"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="#F1F1F3"
-            android:textColor="#15151A"
-            android:textStyle="bold"
-            android:textSize="15sp"
-            android:padding="12dp"
-            android:text="‹ prev" />
-        <TextView
-            android:id="@+id/counter"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:textColor="#555555"
-            android:textSize="13sp"
-            android:text="1 / 79" />
-        <TextView
-            android:id="@+id/btn_next"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="#F1F1F3"
-            android:textColor="#15151A"
-            android:textStyle="bold"
-            android:textSize="15sp"
-            android:padding="12dp"
-            android:text="next ›" />
-    </LinearLayout>
-</LinearLayout>
+</FrameLayout>
