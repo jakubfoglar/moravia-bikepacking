@@ -31,7 +31,7 @@ object Render {
         else -> "🌄"
     }
 
-    private fun catLabel(cat: String): String = when (cat) {
+    fun catLabel(cat: String): String = when (cat) {
         "history" -> "HISTORY"
         "cafe" -> "CAFÉ"
         "food" -> "FOOD"
@@ -65,6 +65,17 @@ object Render {
         out
     } catch (e: Exception) {
         bmp
+    }
+
+    fun pendingDetail(ctx: Context, poiId: Int): PendingIntent {
+        val i = Intent(ctx, PoiDetailActivity::class.java).apply {
+            putExtra("id", poiId)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        return PendingIntent.getActivity(
+            ctx, 1000 + poiId, i,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
     }
 
     fun pendingNav(ctx: Context, action: String, req: Int): PendingIntent {
@@ -130,7 +141,7 @@ object Render {
             rv.setViewVisibility(R.id.more, View.VISIBLE)
             rv.setTextViewText(R.id.more, "Full story ›")
             rv.setTextColor(R.id.more, catColor(poi.category))
-            rv.setOnClickPendingIntent(R.id.more, pendingNav(ctx, "more", 4))
+            rv.setOnClickPendingIntent(R.id.more, pendingDetail(ctx, poi.id))
         } else {
             rv.setViewVisibility(R.id.more, View.GONE)
         }
