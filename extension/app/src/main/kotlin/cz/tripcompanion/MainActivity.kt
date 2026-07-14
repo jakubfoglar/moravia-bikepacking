@@ -1,21 +1,56 @@
 package cz.tripcompanion
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 
-/** Info + self-update screen. The ride action is in the data fields; this is for updating over WiFi. */
+/** Info + self-update + logs screen. Ride action is in the data fields; this is for updates & bug reports. */
 class MainActivity : AppCompatActivity() {
     private lateinit var status: TextView
+    private lateinit var logs: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         status = findViewById(R.id.status)
+        logs = findViewById(R.id.logs)
         findViewById<TextView>(R.id.version).text =
             "Installed: build ${BuildConfig.VERSION_CODE} (v${BuildConfig.VERSION_NAME})"
         findViewById<Button>(R.id.btn_update).setOnClickListener { checkForUpdate() }
+        findViewById<Button>(R.id.btn_refresh).setOnClickListener { refreshLogs() }
+        findViewById<Button>(R.id.btn_copy).setOnClickListener { copyLogs() }
+        findViewById<Button>(R.id.btn_share).setOnClickListener { shareLogs() }
+        refreshLogs()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        refreshLogs()
+    }
+
+    private fun refreshLogs() {
+        logs.text = Logger.dump()
+    }
+
+    private fun copyLogs() {
+        val cm = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        cm.setPrimaryClip(ClipData.newPlainText("Trip Companion logs", Logger.dump()))
+        Toast.makeText(this, "Logs copied", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun shareLogs() {
+        val i = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_SUBJECT, "Trip Companion logs (build ${BuildConfig.VERSION_CODE})")
+            putExtra(Intent.EXTRA_TEXT, Logger.dump())
+        }
+        startActivity(Intent.createChooser(i, "Share logs"))
     }
 
     private fun checkForUpdate() {

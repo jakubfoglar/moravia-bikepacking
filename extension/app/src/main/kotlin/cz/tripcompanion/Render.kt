@@ -37,6 +37,17 @@ object Render {
         else String.format(Locale.US, "➜ %.1f km", remainingKm)
     }
 
+    /** Safe minimal view that surfaces an error on the field instead of rendering black. */
+    fun error(ctx: Context, where: String, e: Throwable): RemoteViews {
+        val rv = RemoteViews(ctx.packageName, R.layout.poi_error)
+        rv.setTextViewText(R.id.err_title, "⚠ $where")
+        rv.setTextViewText(
+            R.id.err_body,
+            "${e.javaClass.simpleName}: ${e.message}\n\nOpen Trip Companion → Logs → Share to send this.",
+        )
+        return rv
+    }
+
     fun pendingNav(ctx: Context, action: String, req: Int): PendingIntent {
         val i = Intent(ctx, NavReceiver::class.java).apply {
             this.action = NavReceiver.ACTION

@@ -79,12 +79,14 @@
         </LinearLayout>
     </LinearLayout>
 
-    <View
+    <!-- Divider: a 1dp TextView, because RemoteViews does not allow a bare <View>. -->
+    <TextView
         android:id="@+id/divider"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:layout_marginTop="10dp"
         android:layout_marginBottom="8dp"
+        android:text=""
         android:background="#ECECEE" />
 
     <TextView
