@@ -26,7 +26,23 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btn_refresh).setOnClickListener { refreshLogs() }
         findViewById<Button>(R.id.btn_copy).setOnClickListener { copyLogs() }
         findViewById<Button>(R.id.btn_share).setOnClickListener { shareLogs() }
+        findViewById<Button>(R.id.day_auto).setOnClickListener { setDay(0) }
+        findViewById<Button>(R.id.day_1).setOnClickListener { setDay(1) }
+        findViewById<Button>(R.id.day_2).setOnClickListener { setDay(2) }
+        refreshDay()
         refreshLogs()
+    }
+
+    private fun setDay(v: Int) {
+        TripSettings.setDayOverride(this, v)
+        refreshDay()
+    }
+
+    private fun refreshDay() {
+        val ov = TripSettings.dayOverride(this)
+        val eff = TripSettings.effectiveDay(this)
+        val mode = if (ov == 0) "auto" else "manual"
+        findViewById<TextView>(R.id.day_effective).text = "Currently: Day $eff ($mode)"
     }
 
     override fun onResume() {

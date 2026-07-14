@@ -22,6 +22,7 @@ class TripCompanionExtension : KarooExtension("trip-companion", "1.0") {
             PoiCatalogDataType(extension),
             PoiNextDataType(extension),
             TrainCatcherDataType(extension),
+            DayOverviewDataType(extension),
         )
     }
 

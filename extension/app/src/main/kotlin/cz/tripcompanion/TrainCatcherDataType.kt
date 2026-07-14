@@ -32,6 +32,7 @@ data class TrainView(
     val marginMin: Int? = null,
     val fallback: String? = null,
     val noTrains: Boolean = false,
+    val inactive: Boolean = false,
 )
 
 /** "Can I still make the train?" — remaining route km vs time-to-departure, judged against your real pace. */
@@ -43,7 +44,7 @@ class TrainCatcherDataType(extension: String) : DataTypeImpl(extension, "train-c
                 PoiRepository.load(context)
                 AppState.flow.collect { st ->
                     try {
-                        emitter.updateView(Render.train(context, compute(st)))
+                        emitter.updateView(Render.train(context, compute(context, st)))
                     } catch (e: Exception) {
                         Logger.logError("train render", e)
                         emitter.updateView(Render.error(context, "Train render", e))
@@ -57,7 +58,8 @@ class TrainCatcherDataType(extension: String) : DataTypeImpl(extension, "train-c
         emitter.setCancellable { job.cancel() }
     }
 
-    private fun compute(st: AppState.State): TrainView {
+    private fun compute(context: android.content.Context, st: AppState.State): TrainView {
+        if (TripSettings.effectiveDay(context) != 2) return TrainView(located = st.located, inactive = true)
         if (!st.located || st.lat == null || st.lon == null) return TrainView(located = false)
         val stationKm = PoiRepository.track.lastOrNull()?.getOrNull(2) ?: return TrainView(located = false)
         val myKm = RouteMath.myRouteKm(st.lat, st.lon, PoiRepository.track)

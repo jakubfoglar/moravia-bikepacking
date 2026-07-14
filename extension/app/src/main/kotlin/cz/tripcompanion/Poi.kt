@@ -31,6 +31,8 @@ object PoiRepository {
         private set
     var track: List<DoubleArray> = emptyList()
         private set
+    var dayTracks: Map<Int, List<DoubleArray>> = emptyMap()
+        private set
     private val bmpCache = HashMap<Int, Bitmap?>()
 
     @Synchronized
@@ -40,10 +42,17 @@ object PoiRepository {
         val pjson = ctx.assets.open("pois.json").bufferedReader().use { it.readText() }
         pois = json.decodeFromString<List<Poi>>(pjson)
         val tjson = ctx.assets.open("track.json").bufferedReader().use { it.readText() }
-        val raw = json.decodeFromString<List<List<Double>>>(tjson)
-        track = raw.map { doubleArrayOf(it[0], it[1], it[2]) }
+        track = json.decodeFromString<List<List<Double>>>(tjson).map { doubleArrayOf(it[0], it[1], it[2]) }
+        val djson = ctx.assets.open("day_tracks.json").bufferedReader().use { it.readText() }
+        dayTracks = json.decodeFromString<Map<String, List<List<Double>>>>(djson)
+            .mapKeys { it.key.toInt() }
+            .mapValues { e -> e.value.map { doubleArrayOf(it[0], it[1], it[2]) } }
         loaded = true
     }
+
+    fun dayTrack(day: Int): List<DoubleArray> = dayTracks[day] ?: emptyList()
+    fun dayTotalKm(day: Int): Double = dayTracks[day]?.lastOrNull()?.get(2) ?: 0.0
+    fun poisForDay(day: Int): List<Poi> = pois.filter { it.day == day }
 
     fun photo(ctx: Context, id: Int): Bitmap? {
         synchronized(bmpCache) {

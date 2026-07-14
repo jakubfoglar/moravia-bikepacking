@@ -8,6 +8,7 @@ import android.graphics.BitmapShader
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.Path
 import android.graphics.RectF
 import android.graphics.Shader
 import android.view.View
@@ -208,6 +209,16 @@ object Render {
             Verdict.RED -> Color.parseColor("#C0392B")
             Verdict.NONE -> Color.parseColor("#14141A")
         }
+        if (tv.inactive) {
+            rv.setTextViewText(R.id.t_train, "🚆 Train Catcher")
+            rv.setTextColor(R.id.t_train, Color.parseColor("#5A5A60"))
+            rv.setViewVisibility(R.id.t_need_band, View.GONE)
+            rv.setTextViewText(R.id.t_remaining, "activates on Day 2")
+            rv.setViewVisibility(R.id.t_you, View.GONE)
+            rv.setViewVisibility(R.id.t_verdict, View.GONE)
+            rv.setViewVisibility(R.id.t_fallback, View.GONE)
+            return rv
+        }
         if (!tv.located) {
             rv.setTextViewText(R.id.t_train, "🚆 15:51 / 17:51 → ${TrainConfig.DEST}")
             rv.setTextColor(R.id.t_train, Color.parseColor("#14141A"))
@@ -275,6 +286,80 @@ object Render {
         } else {
             rv.setViewVisibility(R.id.t_fallback, View.GONE)
         }
+        return rv
+    }
+
+    // ---- Day-overview minimap (Canvas-rendered route shape) ----
+    fun overview(ctx: Context, viewSize: Pair<Int, Int>, day: Int, track: List<DoubleArray>, totalKm: Double, st: AppState.State): RemoteViews {
+        val rv = RemoteViews(ctx.packageName, R.layout.poi_overview)
+        val d = ctx.resources.displayMetrics.density
+        var w = viewSize.first
+        var h = viewSize.second
+        if (w < 40) w = (400 * d).toInt()
+        if (h < 40) h = (330 * d).toInt()
+        val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+        val c = Canvas(bmp)
+        c.drawColor(Color.WHITE)
+        if (track.isEmpty()) { rv.setImageViewBitmap(R.id.map, bmp); return rv }
+
+        val pad = 12f * d
+        val textBand = 56f * d
+        val mapBottom = h - textBand - pad
+        val lats = track.map { it[0] }
+        val lons = track.map { it[1] }
+        val la0 = lats.minOrNull()!!; val la1 = lats.maxOrNull()!!
+        val lo0 = lons.minOrNull()!!; val lo1 = lons.maxOrNull()!!
+        val kx = Math.cos(Math.toRadians((la0 + la1) / 2))
+        val xr = ((lo1 - lo0) * kx).coerceAtLeast(1e-6)
+        val yr = (la1 - la0).coerceAtLeast(1e-6)
+        val mapW = w - 2 * pad; val mapH = mapBottom - pad
+        val s = Math.min(mapW / xr, mapH / yr)
+        val ox = pad + (mapW - xr * s) / 2
+        val oy = pad + (mapH - yr * s) / 2
+        fun sx(lon: Double) = (ox + (lon - lo0) * kx * s).toFloat()
+        fun sy(lat: Double) = (oy + (la1 - lat) * s).toFloat()
+
+        val line = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            style = Paint.Style.STROKE; strokeWidth = 3.2f * d
+            strokeJoin = Paint.Join.ROUND; strokeCap = Paint.Cap.ROUND
+            color = Color.parseColor("#E6197A")
+        }
+        val path = Path().apply {
+            moveTo(sx(track[0][1]), sy(track[0][0]))
+            for (i in 1 until track.size) lineTo(sx(track[i][1]), sy(track[i][0]))
+        }
+        c.drawPath(path, line)
+
+        val dot = Paint(Paint.ANTI_ALIAS_FLAG)
+        dot.color = Color.parseColor("#2E7D32")
+        c.drawCircle(sx(track[0][1]), sy(track[0][0]), 4f * d, dot)
+        dot.color = Color.parseColor("#14141A")
+        val ex = sx(track.last()[1]); val ey = sy(track.last()[0])
+        c.drawRect(ex - 4f * d, ey - 4f * d, ex + 4f * d, ey + 4f * d, dot)
+
+        var remaining = totalKm
+        var pct = 0
+        val la = st.lat; val lo = st.lon
+        if (st.located && la != null && lo != null) {
+            var best = 1e9; var bk = 0.0
+            for (t in track) { val dd = RouteMath.haversine(la, lo, t[0], t[1]); if (dd < best) { best = dd; bk = t[2] } }
+            remaining = (totalKm - bk).coerceAtLeast(0.0)
+            pct = if (totalKm > 0) ((bk / totalKm) * 100).toInt() else 0
+            val halo = Paint(Paint.ANTI_ALIAS_FLAG); halo.color = Color.WHITE
+            c.drawCircle(sx(lo), sy(la), 6.5f * d, halo)
+            dot.color = Color.parseColor("#1a73e8"); c.drawCircle(sx(lo), sy(la), 5f * d, dot)
+        }
+
+        val endName = if (day == 2) "OTROKOVICE" else "VELEHRAD"
+        val t1 = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.parseColor("#5A5A60"); textSize = 10f * d; isFakeBoldText = true }
+        c.drawText("DAY $day · TO $endName", pad, mapBottom + 18f * d, t1)
+        val big = "${remaining.toInt()} km"
+        val t2 = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.parseColor("#14141A"); textSize = 25f * d; isFakeBoldText = true }
+        c.drawText(big, pad, mapBottom + 44f * d, t2)
+        val t3 = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.parseColor("#5A5A60"); textSize = 12f * d }
+        c.drawText("· $pct% done", pad + t2.measureText(big) + 8f * d, mapBottom + 44f * d, t3)
+
+        rv.setImageViewBitmap(R.id.map, bmp)
         return rv
     }
 

@@ -38,6 +38,21 @@ def combined_track():
 track = combined_track()
 print(f"combined track: {len(track)} pts, {track[-1][2]:.1f} km total")
 
+# per-day track shapes (downsampled, with cumulative km) for the overview minimap
+def day_track(fn):
+    pts = load(fn)
+    out=[]; cum=0.0; last=None; acc=0.0
+    for i,p in enumerate(pts):
+        if last is not None:
+            step=hav(last[0],last[1],p[0],p[1]); cum+=step; acc+=step
+        if last is None or acc>=0.4 or i==len(pts)-1:
+            out.append([round(p[0],5),round(p[1],5),round(cum,2)]); acc=0.0
+        last=p
+    return out
+day_tracks = {"1": day_track("export-30.gpx"), "2": day_track("export-29.gpx")}
+json.dump(day_tracks, open(os.path.join(ASSETS,"day_tracks.json"),"w"), separators=(",",":"))
+print(f"day tracks: D1 {len(day_tracks['1'])}pts/{day_tracks['1'][-1][2]:.0f}km, D2 {len(day_tracks['2'])}pts/{day_tracks['2'][-1][2]:.0f}km")
+
 def route_km(lat,lon):
     best=1e9; bk=0.0
     for a,b,k in track:

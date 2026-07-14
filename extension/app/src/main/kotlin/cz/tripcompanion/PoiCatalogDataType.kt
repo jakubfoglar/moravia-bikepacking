@@ -32,8 +32,9 @@ class PoiCatalogDataType(extension: String) : DataTypeImpl(extension, "poi-catal
     }
 
     private fun render(context: Context, st: AppState.State): android.widget.RemoteViews {
-        val pois = PoiRepository.pois
-        if (pois.isEmpty()) return Render.error(context, "Catalog", IllegalStateException("no POIs loaded"))
+        val day = TripSettings.effectiveDay(context)
+        val pois = PoiRepository.poisForDay(day)
+        if (pois.isEmpty()) return Render.error(context, "Catalog", IllegalStateException("no POIs for day $day"))
         val reading = st.mode == AppState.Mode.READING
 
         if (!st.located || st.lat == null || st.lon == null) {

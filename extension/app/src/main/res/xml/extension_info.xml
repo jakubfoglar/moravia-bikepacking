@@ -25,4 +25,11 @@
         graphical="true"
         icon="@drawable/ic_field"
         typeId="train-catcher" />
+
+    <DataType
+        description="@string/overview_desc"
+        displayName="@string/overview_name"
+        graphical="true"
+        icon="@drawable/ic_field"
+        typeId="day-overview" />
 </ExtensionInfo>
