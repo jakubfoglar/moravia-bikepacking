@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ExtensionInfo
+    displayName="@string/app_name"
+    icon="@drawable/ic_field"
+    id="trip-companion"
+    scansDevices="false">
+
+    <DataType
+        description="@string/catalog_desc"
+        displayName="@string/catalog_name"
+        graphical="true"
+        icon="@drawable/ic_field"
+        typeId="poi-catalog" />
+
+    <DataType
+        description="@string/next_desc"
+        displayName="@string/next_name"
+        graphical="true"
+        icon="@drawable/ic_field"
+        typeId="poi-next" />
+</ExtensionInfo>

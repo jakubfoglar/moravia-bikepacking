@@ -1,0 +1,20 @@
+# Gradle / Android build outputs
+extension/.gradle/
+extension/build/
+extension/app/build/
+.gradle/
+
+# Local SDK config (CI uses env; keep local path out of git)
+local.properties
+extension/local.properties
+
+# Brainstorm visual-companion mockups
+.superpowers/
+
+# Intermediate data
+osm_food.json
+
+# OS / editor / python
+.DS_Store
+__pycache__/
+*.pyc
