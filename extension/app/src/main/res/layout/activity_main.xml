@@ -106,6 +106,37 @@
                 android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Day 2" />
         </LinearLayout>
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:textColor="#14141A"
+            android:textStyle="bold"
+            android:textSize="15sp"
+            android:text="Features" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#5A5A60"
+            android:textSize="12sp"
+            android:text="Turn parts off if anything misbehaves on the road. Radar/map take effect on the next start." />
+        <Switch
+            android:id="@+id/sw_radar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Radar Traffic (needs a rear radar)" />
+        <Switch
+            android:id="@+id/sw_map"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Map overlay: train-deadline pin" />
+        <Switch
+            android:id="@+id/sw_scenic"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Minimap: scenic area (Day 1)" />
+
         <!-- Diagnostics -->
         <LinearLayout
             android:layout_width="match_parent"

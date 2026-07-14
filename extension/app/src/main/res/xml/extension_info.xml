@@ -33,4 +33,11 @@
         graphical="true"
         icon="@drawable/ic_field"
         typeId="day-overview" />
+
+    <DataType
+        description="@string/radar_desc"
+        displayName="@string/radar_name"
+        graphical="true"
+        icon="@drawable/ic_field"
+        typeId="radar" />
 </ExtensionInfo>

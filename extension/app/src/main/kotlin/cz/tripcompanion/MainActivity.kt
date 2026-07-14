@@ -29,8 +29,17 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.day_auto).setOnClickListener { setDay(0) }
         findViewById<Button>(R.id.day_1).setOnClickListener { setDay(1) }
         findViewById<Button>(R.id.day_2).setOnClickListener { setDay(2) }
+        wireSwitch(R.id.sw_radar, TripSettings.radarEnabled(this), TripSettings.FLAG_RADAR)
+        wireSwitch(R.id.sw_map, TripSettings.mapOverlayEnabled(this), TripSettings.FLAG_MAP)
+        wireSwitch(R.id.sw_scenic, TripSettings.scenicEnabled(this), TripSettings.FLAG_SCENIC)
         refreshDay()
         refreshLogs()
+    }
+
+    private fun wireSwitch(id: Int, initial: Boolean, flag: String) {
+        val sw = findViewById<android.widget.Switch>(id)
+        sw.isChecked = initial
+        sw.setOnCheckedChangeListener { _, v -> TripSettings.setFlag(this, flag, v) }
     }
 
     private fun setDay(v: Int) {

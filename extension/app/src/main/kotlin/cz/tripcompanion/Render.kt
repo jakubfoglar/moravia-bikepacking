@@ -320,7 +320,7 @@ object Render {
         fun sy(lat: Double) = (oy + (la1 - lat) * s).toFloat()
 
         // Day 1: golden "Moravian Tuscany" scenic area under the track.
-        if (day == 1) {
+        if (day == 1 && TripSettings.scenicEnabled(ctx)) {
             val poly = arrayOf(
                 doubleArrayOf(49.045, 16.965), doubleArrayOf(49.045, 17.135),
                 doubleArrayOf(48.925, 17.145), doubleArrayOf(48.905, 16.975),
@@ -377,6 +377,36 @@ object Render {
         c.drawText("· $pct% done", pad + t2.measureText(big) + 8f * d, mapBottom + 44f * d, t3)
 
         rv.setImageViewBitmap(R.id.map, bmp)
+        return rv
+    }
+
+    // ---- Radar ----
+    fun radar(ctx: Context, ui: RadarEngine.Ui, enabled: Boolean): RemoteViews {
+        val rv = RemoteViews(ctx.packageName, R.layout.radar_field)
+        if (!enabled) {
+            rv.setTextViewText(R.id.r_count, "—")
+            rv.setTextColor(R.id.r_count, Color.parseColor("#5A5A60"))
+            rv.setTextViewText(R.id.r_count_unit, "")
+            rv.setTextViewText(R.id.r_detail, "off · enable in Trip Companion")
+            rv.setTextColor(R.id.r_detail, Color.parseColor("#5A5A60"))
+            return rv
+        }
+        rv.setTextViewText(R.id.r_count, ui.count.toString())
+        rv.setTextColor(R.id.r_count, Color.parseColor("#14141A"))
+        rv.setTextViewText(R.id.r_count_unit, "cars passed")
+        if (!ui.active) {
+            rv.setTextViewText(R.id.r_detail, "waiting for radar signal…")
+            rv.setTextColor(R.id.r_detail, Color.parseColor("#5A5A60"))
+        } else if (ui.hasTarget) {
+            val col = when (ui.threat) {
+                3 -> "#C0392B"; 2 -> "#E07B00"; else -> "#2E7D32"
+            }
+            rv.setTextViewText(R.id.r_detail, "● ${ui.nearestM} m · ~${ui.lastSpeedKmh} km/h")
+            rv.setTextColor(R.id.r_detail, Color.parseColor(col))
+        } else {
+            rv.setTextViewText(R.id.r_detail, "clear · last ~${ui.lastSpeedKmh} km/h")
+            rv.setTextColor(R.id.r_detail, Color.parseColor("#2E7D32"))
+        }
         return rv
     }
 

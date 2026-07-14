@@ -4,12 +4,17 @@ import io.hammerhead.karooext.KarooSystemService
 import io.hammerhead.karooext.extension.KarooExtension
 import io.hammerhead.karooext.internal.Emitter
 import io.hammerhead.karooext.models.DataType
+import io.hammerhead.karooext.models.DeveloperField
+import io.hammerhead.karooext.models.FieldValue
+import io.hammerhead.karooext.models.FitEffect
 import io.hammerhead.karooext.models.HideSymbols
 import io.hammerhead.karooext.models.MapEffect
 import io.hammerhead.karooext.models.OnLocationChanged
 import io.hammerhead.karooext.models.ShowSymbols
 import io.hammerhead.karooext.models.StreamState
 import io.hammerhead.karooext.models.Symbol
+import io.hammerhead.karooext.models.WriteDeveloperDataIdMesg
+import io.hammerhead.karooext.models.WriteToRecordMesg
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -29,6 +34,7 @@ class TripCompanionExtension : KarooExtension("trip-companion", "1.0") {
             PoiNextDataType(extension),
             TrainCatcherDataType(extension),
             DayOverviewDataType(extension),
+            RadarDataType(extension),
         )
     }
 
@@ -42,8 +48,34 @@ class TripCompanionExtension : KarooExtension("trip-companion", "1.0") {
                     AppState.updateLocation(loc.lat, loc.lng)
                 }
                 streamAvgSpeed()
+                if (TripSettings.radarEnabled(applicationContext)) {
+                    RadarEngine.start(karooSystem, applicationContext)
+                }
             }
         }
+    }
+
+    /** Record radar metrics into the ride's FIT file (only when radar is enabled). */
+    override fun startFit(emitter: Emitter<FitEffect>) {
+        if (!TripSettings.radarEnabled(applicationContext)) return
+        val countField = DeveloperField(0, 132, "radar_vehicle_count", "count")
+        val nearestField = DeveloperField(1, 132, "radar_nearest_distance", "m")
+        val speedField = DeveloperField(2, 132, "radar_passing_speed", "km/h")
+        emitter.onNext(WriteDeveloperDataIdMesg(0))
+        val job = scope.launch {
+            RadarEngine.flow.collect { ui ->
+                emitter.onNext(
+                    WriteToRecordMesg(
+                        listOf(
+                            FieldValue(countField, ui.count.toDouble()),
+                            FieldValue(nearestField, ui.nearestM.toDouble()),
+                            FieldValue(speedField, ui.lastSpeedKmh.toDouble()),
+                        ),
+                    ),
+                )
+            }
+        }
+        emitter.setCancellable { job.cancel() }
     }
 
     private fun streamAvgSpeed() {
@@ -68,7 +100,7 @@ class TripCompanionExtension : KarooExtension("trip-companion", "1.0") {
                 PoiRepository.load(applicationContext)
                 var shownKm = -999.0
                 AppState.flow.collect { st ->
-                    val pt = deadlinePoint(st)
+                    val pt = if (TripSettings.mapOverlayEnabled(applicationContext)) deadlinePoint(st) else null
                     if (pt != null) {
                         if (Math.abs(pt.third - shownKm) > 0.05) {
                             emitter.onNext(
