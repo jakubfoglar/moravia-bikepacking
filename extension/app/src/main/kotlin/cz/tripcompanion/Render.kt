@@ -199,6 +199,85 @@ object Render {
         return rv
     }
 
+    // ---- Train Catcher ----
+    fun train(ctx: Context, tv: TrainView): RemoteViews {
+        val rv = RemoteViews(ctx.packageName, R.layout.train_field)
+        fun vColor(v: Verdict) = when (v) {
+            Verdict.GREEN -> Color.parseColor("#2E7D32")
+            Verdict.AMBER -> Color.parseColor("#E07B00")
+            Verdict.RED -> Color.parseColor("#C0392B")
+            Verdict.NONE -> Color.parseColor("#14141A")
+        }
+        if (!tv.located) {
+            rv.setTextViewText(R.id.t_train, "🚆 15:51 / 17:51 → ${TrainConfig.DEST}")
+            rv.setTextColor(R.id.t_train, Color.parseColor("#14141A"))
+            rv.setViewVisibility(R.id.t_need_band, View.GONE)
+            rv.setTextViewText(R.id.t_remaining, "waiting for GPS…")
+            rv.setViewVisibility(R.id.t_you, View.GONE)
+            rv.setViewVisibility(R.id.t_verdict, View.GONE)
+            rv.setViewVisibility(R.id.t_fallback, View.GONE)
+            return rv
+        }
+        if (tv.noTrains) {
+            rv.setTextViewText(R.id.t_train, "🚆 last train has gone")
+            rv.setTextColor(R.id.t_train, Color.parseColor("#C0392B"))
+            rv.setViewVisibility(R.id.t_need_band, View.GONE)
+            rv.setTextViewText(R.id.t_remaining, String.format(Locale.US, "%.0f km to %s", tv.remainingKm, TrainConfig.STATION))
+            rv.setViewVisibility(R.id.t_you, View.GONE)
+            rv.setViewVisibility(R.id.t_verdict, View.GONE)
+            rv.setViewVisibility(R.id.t_fallback, View.GONE)
+            return rv
+        }
+        rv.setTextViewText(R.id.t_train, "🚆 ${tv.label} → ${TrainConfig.DEST}")
+        rv.setTextColor(R.id.t_train, vColor(tv.verdict))
+        rv.setViewVisibility(R.id.t_need_band, View.VISIBLE)
+        val needTxt = when {
+            tv.requiredKmh >= 100 -> "—"
+            tv.requiredKmh >= 10 -> String.format(Locale.US, "%.0f", tv.requiredKmh)
+            else -> String.format(Locale.US, "%.1f", tv.requiredKmh)
+        }
+        rv.setTextViewText(R.id.t_need_num, needTxt)
+        rv.setTextColor(R.id.t_need_num, vColor(tv.verdict))
+        rv.setTextViewText(R.id.t_remaining, String.format(Locale.US, "%.1f km to %s", tv.remainingKm, TrainConfig.STATION))
+
+        if (tv.youKmh != null) {
+            rv.setViewVisibility(R.id.t_you, View.VISIBLE)
+            rv.setTextViewText(R.id.t_you, String.format(Locale.US, "you're at %.1f km/h avg", tv.youKmh))
+        } else {
+            rv.setViewVisibility(R.id.t_you, View.GONE)
+        }
+
+        rv.setViewVisibility(R.id.t_verdict, View.VISIBLE)
+        if (tv.marginMin != null) {
+            if (tv.marginMin >= 0) {
+                rv.setTextViewText(R.id.t_verdict, "✓ making it · +${tv.marginMin} min")
+                rv.setTextColor(R.id.t_verdict, Color.parseColor("#2E7D32"))
+            } else {
+                rv.setTextViewText(R.id.t_verdict, "✗ ${-tv.marginMin} min short")
+                rv.setTextColor(R.id.t_verdict, Color.parseColor("#C0392B"))
+            }
+        } else {
+            val txt: String
+            val col: String
+            when (tv.verdict) {
+                Verdict.GREEN -> { txt = "comfortable at your pace"; col = "#2E7D32" }
+                Verdict.AMBER -> { txt = "doable if you keep rolling"; col = "#E07B00" }
+                Verdict.RED -> { txt = "not at your usual pace"; col = "#C0392B" }
+                Verdict.NONE -> { txt = ""; col = "#14141A" }
+            }
+            rv.setTextViewText(R.id.t_verdict, txt)
+            rv.setTextColor(R.id.t_verdict, Color.parseColor(col))
+        }
+
+        if (tv.fallback != null) {
+            rv.setViewVisibility(R.id.t_fallback, View.VISIBLE)
+            rv.setTextViewText(R.id.t_fallback, tv.fallback)
+        } else {
+            rv.setViewVisibility(R.id.t_fallback, View.GONE)
+        }
+        return rv
+    }
+
     // ---- Error ----
     fun error(ctx: Context, where: String, e: Throwable): RemoteViews {
         val rv = RemoteViews(ctx.packageName, R.layout.poi_error)

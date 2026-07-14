@@ -5,5 +5,7 @@
     <string name="catalog_desc">Swipe through your trip\'s points of interest — photo, info and along-route distance.</string>
     <string name="next_name">Next POI</string>
     <string name="next_desc">The nearest upcoming point of interest ahead on your route.</string>
+    <string name="train_name">Train Catcher</string>
+    <string name="train_desc">Can you still make the train home? Required pace vs your live average.</string>
     <string name="about_text">Trip Companion\n\nAdd the \"POI Catalog\" data field to a full-size ride page, and \"Next POI\" to your map page.\n\nEverything works offline — 79 POIs and photos are bundled.\n\nRoute: Břeclav → Velehrad → Otrokovice.</string>
 </resources>

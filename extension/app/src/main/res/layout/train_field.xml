@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/t_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#5A5A60"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.06"
+            android:text="TRAIN CATCHER" />
+
+        <TextView
+            android:id="@+id/t_train"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textColor="#14141A"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:text="🚆 15:51 → Praha" />
+
+        <LinearLayout
+            android:id="@+id/t_need_band"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/t_need_num"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#14141A"
+                android:textSize="30sp"
+                android:textStyle="bold"
+                android:text="20" />
+            <TextView
+                android:id="@+id/t_need_unit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginBottom="3dp"
+                android:layout_gravity="bottom"
+                android:textColor="#5A5A60"
+                android:textSize="14sp"
+                android:text="km/h needed" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/t_remaining"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textColor="#5A5A60"
+            android:textSize="13sp"
+            android:text="36 km to Otrokovice" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp"
+            android:text=""
+            android:background="#E6E6E9" />
+
+        <TextView
+            android:id="@+id/t_you"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#26262B"
+            android:textSize="15sp"
+            android:text="you're at 15.1 km/h" />
+
+        <TextView
+            android:id="@+id/t_verdict"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textColor="#C0392B"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:text="✗ 12 min short" />
+
+        <TextView
+            android:id="@+id/t_fallback"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textColor="#5A5A60"
+            android:textSize="13sp"
+            android:text="next: 17:51 · need 11 km/h" />
+    </LinearLayout>
+</FrameLayout>
