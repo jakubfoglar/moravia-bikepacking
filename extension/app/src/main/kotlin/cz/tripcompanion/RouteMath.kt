@@ -31,6 +31,21 @@ object RouteMath {
         return km
     }
 
+    /** Interpolate a lat/lon at a given cumulative-km along a track carrying [lat,lon,cumKm]. */
+    fun pointAtKm(track: List<DoubleArray>, km: Double): Pair<Double, Double> {
+        if (track.isEmpty()) return 0.0 to 0.0
+        if (km <= track.first()[2]) return track.first()[0] to track.first()[1]
+        for (i in 1 until track.size) {
+            if (track[i][2] >= km) {
+                val a = track[i - 1]; val b = track[i]
+                val seg = b[2] - a[2]
+                val f = if (seg > 0) (km - a[2]) / seg else 0.0
+                return (a[0] + (b[0] - a[0]) * f) to (a[1] + (b[1] - a[1]) * f)
+            }
+        }
+        return track.last()[0] to track.last()[1]
+    }
+
     data class Ahead(val poi: Poi, val remainingKm: Double)
 
     /** POIs still ahead of you, nearest first. Keeps a small margin so a just-passed POI lingers briefly. */

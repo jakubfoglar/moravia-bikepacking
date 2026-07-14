@@ -319,6 +319,23 @@ object Render {
         fun sx(lon: Double) = (ox + (lon - lo0) * kx * s).toFloat()
         fun sy(lat: Double) = (oy + (la1 - lat) * s).toFloat()
 
+        // Day 1: golden "Moravian Tuscany" scenic area under the track.
+        if (day == 1) {
+            val poly = arrayOf(
+                doubleArrayOf(49.045, 16.965), doubleArrayOf(49.045, 17.135),
+                doubleArrayOf(48.925, 17.145), doubleArrayOf(48.905, 16.975),
+            )
+            val fill = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.parseColor("#47DAA520") }
+            val gp = Path().apply {
+                moveTo(sx(poly[0][1]), sy(poly[0][0]))
+                for (i in 1 until poly.size) lineTo(sx(poly[i][1]), sy(poly[i][0]))
+                close()
+            }
+            c.drawPath(gp, fill)
+            val glabel = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.parseColor("#9C7A00"); textSize = 9f * d; isFakeBoldText = true }
+            c.drawText("Toskánsko", sx(17.00), sy(48.985), glabel)
+        }
+
         val line = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             style = Paint.Style.STROKE; strokeWidth = 3.2f * d
             strokeJoin = Paint.Join.ROUND; strokeCap = Paint.Cap.ROUND

@@ -3,7 +3,8 @@
     displayName="@string/app_name"
     icon="@drawable/ic_field"
     id="trip-companion"
-    scansDevices="false">
+    scansDevices="false"
+    mapLayer="true">
 
     <DataType
         description="@string/catalog_desc"
