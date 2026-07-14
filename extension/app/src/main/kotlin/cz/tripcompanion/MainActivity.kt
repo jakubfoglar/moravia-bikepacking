@@ -59,7 +59,7 @@ class MainActivity : AppCompatActivity() {
             val rel = UpdateManager.fetchLatest()
             when {
                 rel == null ->
-                    setStatus("Couldn't reach GitHub. Is the Karoo online (WiFi / phone hotspot)?")
+                    setStatus("Couldn't reach GitHub (${UpdateManager.lastError ?: "no response"}). The Karoo needs real WiFi / a phone WiFi-hotspot — a Bluetooth tether usually won't route app traffic.")
                 rel.versionCode <= BuildConfig.VERSION_CODE ->
                     setStatus("You're up to date (build ${BuildConfig.VERSION_CODE}).")
                 else -> {

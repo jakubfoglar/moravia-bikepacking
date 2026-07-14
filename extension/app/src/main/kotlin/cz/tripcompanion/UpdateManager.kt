@@ -21,6 +21,10 @@ object UpdateManager {
     const val REPO = "moravia-bikepacking"
     private const val API = "https://api.github.com/repos/$OWNER/$REPO/releases/latest"
 
+    @Volatile
+    var lastError: String? = null
+        private set
+
     data class Release(val versionCode: Int, val name: String, val apkUrl: String)
 
     private fun httpGet(urlStr: String): String {
@@ -30,12 +34,18 @@ object UpdateManager {
             setRequestProperty("Accept", "application/vnd.github+json")
             setRequestProperty("User-Agent", "TripCompanion")
         }
+        val code = c.responseCode
+        if (code !in 200..299) {
+            val err = c.errorStream?.bufferedReader()?.use { it.readText() }?.take(120) ?: ""
+            throw java.io.IOException("HTTP $code ${c.responseMessage} $err")
+        }
         c.inputStream.bufferedReader().use { return it.readText() }
     }
 
     /** Latest release (tag "v<N>" carries the build number) or null on error / none. */
     fun fetchLatest(): Release? {
         return try {
+            Logger.log("update.fetch", "GET $API")
             val json = JSONObject(httpGet(API))
             val tag = json.optString("tag_name")
             val vc = tag.removePrefix("v").toIntOrNull() ?: return null
