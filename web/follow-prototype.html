@@ -1,0 +1,115 @@
+<style>
+  :root{
+    --bg:#FFFFFF; --ink:#111114; --muted:#70737A; --line:#EAEBED; --faint:#F5F6F7; --accent:#E4342B;
+    color-scheme: light;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; background:var(--bg); }
+  .wrap{
+    max-width:440px; margin:0 auto; padding:34px 22px 60px;
+    font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Helvetica,Arial,sans-serif;
+    color:var(--ink); -webkit-font-smoothing:antialiased;
+    font-variant-numeric:tabular-nums;
+  }
+  .name{ font-size:15px; font-weight:600; letter-spacing:-0.01em; }
+  .route{ font-size:13px; color:var(--muted); margin-top:1px; }
+
+  .now{ margin-top:30px; }
+  .status{ display:flex; align-items:center; gap:8px; font-size:13px; color:var(--muted); }
+  .dot{ width:8px; height:8px; border-radius:50%; background:var(--accent); }
+  @media (prefers-reduced-motion:no-preference){ .dot{ animation:pulse 2.4s ease-in-out infinite; } }
+  @keyframes pulse{ 0%,100%{ opacity:1 } 50%{ opacity:.35 } }
+  .place{ font-size:34px; font-weight:640; letter-spacing:-0.025em; line-height:1.05; margin-top:9px; }
+  .sincetxt{ font-size:14px; color:var(--muted); margin-top:6px; }
+
+  .track{ margin-top:26px; }
+  .trackhead{ display:flex; justify-content:space-between; align-items:baseline; font-size:13px; color:var(--muted); }
+  .trackhead b{ color:var(--ink); font-weight:600; }
+  .bar{ position:relative; height:2px; background:var(--line); margin-top:12px; }
+  .fill{ position:absolute; left:0; top:0; height:2px; background:var(--ink); width:71%; }
+  .marker{ position:absolute; top:-3px; left:71%; width:8px; height:8px; border-radius:50%; background:var(--accent); transform:translateX(-50%); }
+  .ends{ display:flex; justify-content:space-between; font-size:11px; color:var(--muted); margin-top:9px; }
+
+  .stats{ display:grid; grid-template-columns:repeat(3,1fr); gap:0; margin-top:30px; }
+  .stat .v{ font-size:21px; font-weight:600; letter-spacing:-0.02em; }
+  .stat .k{ font-size:11px; color:var(--muted); margin-top:3px; text-transform:uppercase; letter-spacing:.04em; }
+
+  .rule{ height:1px; background:var(--line); margin:30px 0 4px; }
+
+  .feed{ }
+  .entry{ padding:22px 0; border-bottom:1px solid var(--line); }
+  .t{ font-size:12px; color:var(--muted); letter-spacing:.02em; }
+  .line{ font-size:16px; line-height:1.42; margin-top:7px; text-wrap:pretty; }
+  .media{ margin-top:14px; border-radius:5px; overflow:hidden; }
+  .photo{ width:100%; aspect-ratio:4/3; background:var(--faint); box-shadow:inset 0 0 0 1px var(--line); }
+  .draw{ width:100%; aspect-ratio:2/1; background:var(--faint); box-shadow:inset 0 0 0 1px var(--line); display:block; }
+  .foot{ margin-top:28px; font-size:12px; color:var(--muted); }
+</style>
+
+<div class="wrap">
+  <div class="name">Jakub</div>
+  <div class="route">Břeclav → Otrokovice</div>
+
+  <div class="now">
+    <div class="status"><span class="dot"></span>coffee stop · Vizovice</div>
+    <div class="place">Vizovice</div>
+    <div class="sincetxt">not moving for 12 minutes</div>
+  </div>
+
+  <div class="track">
+    <div class="trackhead"><span>Day 2</span><span><b>88</b> / 124 km</span></div>
+    <div class="bar"><div class="fill"></div><div class="marker"></div></div>
+    <div class="ends"><span>Velehrad</span><span>Otrokovice</span></div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="v">88</div><div class="k">km</div></div>
+    <div class="stat"><div class="v">23</div><div class="k">cars</div></div>
+    <div class="stat"><div class="v">4:41</div><div class="k">moving</div></div>
+  </div>
+
+  <div class="rule"></div>
+
+  <div class="feed">
+    <div class="entry">
+      <div class="t">14:32</div>
+      <div class="line">Svačím. Nehnul jsem se dvanáct minut, takže to bude vážná svačina.</div>
+      <div class="media"><div class="photo"></div></div>
+    </div>
+
+    <div class="entry">
+      <div class="t">13:58</div>
+      <div class="line">Zámek Vizovice. Slivovici zatím nikdo nenabídl.</div>
+    </div>
+
+    <div class="entry">
+      <div class="t">13:20</div>
+      <div class="line">Nakreslil jsem ti ten kopec.</div>
+      <div class="media">
+        <svg class="draw" viewBox="0 0 300 150" preserveAspectRatio="xMidYMid meet">
+          <path d="M18 128 C 70 126, 96 120, 150 60 C 176 30, 210 24, 236 40 C 258 54, 274 92, 286 128"
+                fill="none" stroke="#111114" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="150" cy="60" r="4" fill="#E4342B"/>
+          <path d="M150 60 l -5 -13 l 12 5 z" fill="#111114"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="t">12:45</div>
+      <div class="line">Půlka za mnou. Prý už jen z kopce.</div>
+    </div>
+
+    <div class="entry">
+      <div class="t">11:30</div>
+      <div class="line">Předjelo mě třiadvacet aut. Počítám je.</div>
+    </div>
+
+    <div class="entry" style="border-bottom:none">
+      <div class="t">09:02</div>
+      <div class="line">Vyrazil jsem z Velehradu.</div>
+    </div>
+  </div>
+
+  <div class="foot">updated 14:33</div>
+</div>

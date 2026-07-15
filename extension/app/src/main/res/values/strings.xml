@@ -12,4 +12,17 @@
     <string name="radar_name">Radar Traffic</string>
     <string name="radar_desc">Cars passed, closest range and estimated speed from a rear radar. Enable in the app.</string>
     <string name="about_text">Trip Companion\n\nAdd the \"POI Catalog\" data field to a full-size ride page, and \"Next POI\" to your map page.\n\nEverything works offline — 79 POIs and photos are bundled.\n\nRoute: Břeclav → Velehrad → Otrokovice.</string>
+
+    <string name="sketch_title">Nakresli něco</string>
+    <string name="sketch_undo">Zpět</string>
+    <string name="sketch_clear">Smazat</string>
+    <string name="sketch_close">Zavřít</string>
+    <string name="sketch_send">Poslat</string>
+
+    <string name="posting_head">Follow website</string>
+    <string name="posting_flag">Post ride events to the website</string>
+    <string name="posting_secret_hint">Ingest secret</string>
+    <string name="posting_save">Save secret</string>
+    <string name="posting_test">Send test post</string>
+    <string name="posting_sketch">Draw something ›</string>
 </resources>

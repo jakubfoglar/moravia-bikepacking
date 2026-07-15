@@ -6,14 +6,25 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
+import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import io.hammerhead.karooext.KarooSystemService
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /** Info + self-update + logs screen. Ride action is in the data fields; this is for updates & bug reports. */
 class MainActivity : AppCompatActivity() {
     private lateinit var status: TextView
     private lateinit var logs: TextView
+    private lateinit var postStatus: TextView
+    private lateinit var secretField: EditText
+    private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,8 +43,46 @@ class MainActivity : AppCompatActivity() {
         wireSwitch(R.id.sw_radar, TripSettings.radarEnabled(this), TripSettings.FLAG_RADAR)
         wireSwitch(R.id.sw_map, TripSettings.mapOverlayEnabled(this), TripSettings.FLAG_MAP)
         wireSwitch(R.id.sw_scenic, TripSettings.scenicEnabled(this), TripSettings.FLAG_SCENIC)
+        wireSwitch(R.id.sw_posting, TripPoster.postingEnabled(this), TripPoster.FLAG_POSTING)
+
+        postStatus = findViewById(R.id.post_status)
+        secretField = findViewById(R.id.ed_secret)
+        secretField.setText(TripPoster.secret(this))
+        findViewById<Button>(R.id.btn_secret).setOnClickListener {
+            TripPoster.setSecret(this, secretField.text.toString())
+            postStatus.text = if (TripPoster.secret(this).isEmpty()) "Secret cleared." else "Secret saved."
+        }
+        findViewById<Button>(R.id.btn_testpost).setOnClickListener { testPost() }
+        findViewById<Button>(R.id.btn_sketch).setOnClickListener {
+            startActivity(Intent(this, SketchActivity::class.java))
+        }
+
         refreshDay()
         refreshLogs()
+    }
+
+    /** Proves the whole chain in one tap: Karoo → Companion → Supabase → Fable → back. */
+    private fun testPost() {
+        postStatus.text = "Posting…"
+        val karoo = KarooSystemService(applicationContext)
+        karoo.connect { connected ->
+            if (!connected) {
+                runOnUiThread { postStatus.text = "Karoo system service not connected." }
+                return@connect
+            }
+            scope.launch {
+                val st = AppState.flow.value
+                val payload = TripPoster.autoEvent(
+                    "test",
+                    mapOf("poznamka" to "zkouška z aplikace", "build" to BuildConfig.VERSION_CODE),
+                    st.lat, st.lon, TripSettings.effectiveDay(this@MainActivity),
+                )
+                val r = withContext(Dispatchers.IO) { TripPoster.send(karoo, applicationContext, payload) }
+                postStatus.text = if (r.ok) "Fable: ${r.caption ?: "(posted)"}" else "Failed: ${r.error}"
+                try { karoo.disconnect() } catch (e: Exception) { /* already gone */ }
+                refreshLogs()
+            }
+        }
     }
 
     private fun wireSwitch(id: Int, initial: Boolean, flag: String) {
@@ -102,4 +151,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setStatus(s: String) = runOnUiThread { status.text = s }
+
+    override fun onDestroy() {
+        scope.cancel()
+        super.onDestroy()
+    }
 }

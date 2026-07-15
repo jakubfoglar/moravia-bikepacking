@@ -137,6 +137,66 @@
             android:layout_height="wrap_content"
             android:text="Minimap: scenic area (Day 1)" />
 
+        <!-- Follow website -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:textColor="#14141A"
+            android:textStyle="bold"
+            android:textSize="15sp"
+            android:text="@string/posting_head" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#5A5A60"
+            android:textSize="12sp"
+            android:text="Ride events post themselves over the phone link — no WiFi needed. Paste the secret once." />
+        <Switch
+            android:id="@+id/sw_posting"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/posting_flag" />
+        <EditText
+            android:id="@+id/ed_secret"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:hint="@string/posting_secret_hint"
+            android:inputType="textVisiblePassword"
+            android:textSize="13sp"
+            android:autofillHints="password" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="4dp">
+            <Button android:id="@+id/btn_secret" style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                android:text="@string/posting_save" />
+            <Button android:id="@+id/btn_testpost" style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                android:text="@string/posting_test" />
+        </LinearLayout>
+        <Button
+            android:id="@+id/btn_sketch"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="6dp"
+            android:background="@drawable/btn_update_bg"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:text="@string/posting_sketch" />
+        <TextView
+            android:id="@+id/post_status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textColor="#26262B"
+            android:textSize="13sp"
+            android:text="" />
+
         <!-- Diagnostics -->
         <LinearLayout
             android:layout_width="match_parent"

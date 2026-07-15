@@ -51,6 +51,8 @@ class TripCompanionExtension : KarooExtension("trip-companion", "1.0") {
                 if (TripSettings.radarEnabled(applicationContext)) {
                     RadarEngine.start(karooSystem, applicationContext)
                 }
+                // Posts ride events to the follow website over the phone's Companion link.
+                RideNarrator.start(karooSystem, applicationContext, scope)
             }
         }
     }
@@ -140,6 +142,7 @@ class TripCompanionExtension : KarooExtension("trip-companion", "1.0") {
 
     override fun onDestroy() {
         consumerId?.let { karooSystem.removeConsumer(it) }
+        RideNarrator.stop()
         scope.cancel()
         try {
             karooSystem.disconnect()

@@ -14,6 +14,10 @@ extension/local.properties
 # Intermediate data
 osm_food.json
 
+# Vercel local project link
+.vercel/
+web/site/.vercel/
+
 # OS / editor / python
 .DS_Store
 __pycache__/

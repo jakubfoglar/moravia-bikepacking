@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Jakub · Břeclav → Otrokovice</title>
+<meta name="description" content="Dva dny na kole přes Moravu.">
+<meta property="og:title" content="Jakub · Břeclav → Otrokovice">
+<meta property="og:description" content="Dva dny na kole přes Moravu.">
+<style>
+  :root{
+    --bg:#FFFFFF; --ink:#111114; --muted:#70737A; --line:#EAEBED; --faint:#F5F6F7; --accent:#E4342B;
+    color-scheme: light;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; background:var(--bg); }
+  .wrap{
+    max-width:440px; margin:0 auto; padding:34px 22px 60px;
+    font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Helvetica,Arial,sans-serif;
+    color:var(--ink); -webkit-font-smoothing:antialiased;
+    font-variant-numeric:tabular-nums;
+  }
+  .name{ font-size:15px; font-weight:600; letter-spacing:-0.01em; }
+  .route{ font-size:13px; color:var(--muted); margin-top:1px; }
+
+  .now{ margin-top:30px; }
+  .status{ display:flex; align-items:center; gap:8px; font-size:13px; color:var(--muted); }
+  .dot{ width:8px; height:8px; border-radius:50%; background:var(--accent); flex:none; }
+  @media (prefers-reduced-motion:no-preference){ .dot.live{ animation:pulse 2.4s ease-in-out infinite; } }
+  @keyframes pulse{ 0%,100%{ opacity:1 } 50%{ opacity:.35 } }
+  .dot.idle{ background:var(--muted); }
+  .place{ font-size:34px; font-weight:640; letter-spacing:-0.025em; line-height:1.05; margin-top:9px; text-wrap:balance; }
+  .sincetxt{ font-size:14px; color:var(--muted); margin-top:6px; }
+
+  .track{ margin-top:26px; }
+  .trackhead{ display:flex; justify-content:space-between; align-items:baseline; font-size:13px; color:var(--muted); }
+  .trackhead b{ color:var(--ink); font-weight:600; }
+  .bar{ position:relative; height:2px; background:var(--line); margin-top:12px; }
+  .fill{ position:absolute; left:0; top:0; height:2px; background:var(--ink); width:0; transition:width .6s ease; }
+  .marker{ position:absolute; top:-3px; left:0; width:8px; height:8px; border-radius:50%; background:var(--accent); transform:translateX(-50%); transition:left .6s ease; }
+  .ends{ display:flex; justify-content:space-between; font-size:11px; color:var(--muted); margin-top:9px; }
+
+  /* Map: the route as a drawn line. No tiles, no imagery. */
+  .map{ margin-top:24px; }
+  .mapsvg{ width:100%; display:block; overflow:visible; }
+  .rt-done{ fill:none; stroke:var(--ink); stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; }
+  .rt-todo{ fill:none; stroke:var(--line); stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; }
+  .poi{ fill:#B9BCC2; cursor:pointer; }
+  .poi:hover, .poi:focus{ fill:var(--ink); outline:none; }
+  .poi.sel{ fill:var(--ink); }
+  .poi-hit{ fill:transparent; cursor:pointer; }
+  .me{ fill:var(--accent); }
+  .me-ring{ fill:none; stroke:var(--accent); stroke-width:1.2; opacity:.35; }
+  .townlbl{ font-size:9px; fill:var(--muted); font-family:inherit; letter-spacing:.02em; }
+  .endlbl{ font-size:9px; fill:var(--ink); font-family:inherit; font-weight:600; }
+
+  .poicard{ margin-top:12px; padding:13px 14px; background:var(--faint); border-radius:6px; display:none; }
+  .poicard.on{ display:block; }
+  .poicard .pc-cat{ font-size:10px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); }
+  .poicard .pc-name{ font-size:15px; font-weight:600; margin-top:3px; letter-spacing:-0.01em; }
+  .poicard .pc-hook{ font-size:13px; color:var(--muted); margin-top:4px; line-height:1.4; }
+  .maphint{ font-size:11px; color:var(--muted); margin-top:10px; }
+
+  .stats{ display:grid; grid-template-columns:repeat(3,1fr); gap:0; margin-top:28px; }
+  .stat .v{ font-size:21px; font-weight:600; letter-spacing:-0.02em; }
+  .stat .k{ font-size:11px; color:var(--muted); margin-top:3px; text-transform:uppercase; letter-spacing:.04em; }
+
+  .rule{ height:1px; background:var(--line); margin:30px 0 4px; }
+
+  .entry{ padding:22px 0; border-bottom:1px solid var(--line); }
+  .entry:last-child{ border-bottom:none; }
+  .t{ font-size:12px; color:var(--muted); letter-spacing:.02em; }
+  .line{ font-size:16px; line-height:1.42; margin-top:7px; text-wrap:pretty; }
+  .said{ font-size:14px; line-height:1.45; margin-top:5px; color:var(--muted); }
+  .media{ margin-top:14px; border-radius:5px; overflow:hidden; }
+  .media img{ width:100%; display:block; background:var(--faint); }
+  .empty{ padding:26px 0; font-size:15px; color:var(--muted); }
+  .foot{ margin-top:28px; font-size:12px; color:var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="name" id="rider">Jakub</div>
+  <div class="route" id="routeline">Břeclav → Otrokovice</div>
+
+  <div class="now">
+    <div class="status"><span class="dot idle" id="dot"></span><span id="statustxt">čeká na start</span></div>
+    <div class="place" id="place">Břeclav</div>
+    <div class="sincetxt" id="since"></div>
+  </div>
+
+  <div class="track">
+    <div class="trackhead"><span id="dayname">Den 1</span><span><b id="kmnow">0</b> / <span id="kmtot">140</span> km</span></div>
+    <div class="bar"><div class="fill" id="fill"></div><div class="marker" id="marker"></div></div>
+    <div class="ends"><span id="endA">Břeclav</span><span id="endB">Velehrad</span></div>
+  </div>
+
+  <div class="map">
+    <svg class="mapsvg" id="map" viewBox="0 0 300 190" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Trasa dne"></svg>
+    <div class="poicard" id="poicard">
+      <div class="pc-cat" id="pcCat"></div>
+      <div class="pc-name" id="pcName"></div>
+      <div class="pc-hook" id="pcHook"></div>
+    </div>
+    <div class="maphint">Tečky jsou zastávky na dnešek. Klepni na ně.</div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="v" id="sKm">0</div><div class="k">km</div></div>
+    <div class="stat"><div class="v" id="sCars">0</div><div class="k">aut</div></div>
+    <div class="stat"><div class="v" id="sMov">0:00</div><div class="k">v sedle</div></div>
+  </div>
+
+  <div class="rule"></div>
+  <div id="feed"><div class="empty">Zatím nic. Start v pátek ráno.</div></div>
+  <div class="foot" id="foot"></div>
+</div>
+
+<script>
+const SB_URL = "https://nqtvcxztuuoywznxrxga.supabase.co";
+const SB_KEY = "sb_publishable_Ou9bt8UWXx7u5AXeawPWew_eQK_RLAH";
+
+const CAT_CS = { nature:"Příroda", history:"Historie", cafe:"Kavárna", food:"Jídlo" };
+let RIDE = null, SEL = null;
+
+const $ = (id) => document.getElementById(id);
+const pad = (n) => String(n).padStart(2, "0");
+const hhmm = (iso) => { const d = new Date(iso); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+
+function hoursMins(secs) {
+  const h = Math.floor(secs / 3600), m = Math.floor((secs % 3600) / 60);
+  return `${h}:${pad(m)}`;
+}
+
+function agoCs(iso) {
+  const mins = Math.round((Date.now() - new Date(iso)) / 60000);
+  if (mins < 1) return "před chvílí";
+  if (mins < 60) return `${mins} min`;
+  const h = Math.floor(mins / 60);
+  return `${h} h ${mins % 60} min`;
+}
+
+/* ---- map projection: equirectangular, fitted to the day's bounding box ---- */
+function projector(pts, w, h, padPx) {
+  const lats = pts.map(p => p[0]), lons = pts.map(p => p[1]);
+  const latMid = (Math.min(...lats) + Math.max(...lats)) / 2;
+  const kx = Math.cos(latMid * Math.PI / 180); // lon degrees are shorter this far north
+  const xs = lons.map(l => l * kx), ys = lats.map(l => -l);
+  const x0 = Math.min(...xs), x1 = Math.max(...xs);
+  const y0 = Math.min(...ys), y1 = Math.max(...ys);
+  const s = Math.min((w - padPx * 2) / (x1 - x0 || 1e-9), (h - padPx * 2) / (y1 - y0 || 1e-9));
+  const ox = (w - (x1 - x0) * s) / 2, oy = (h - (y1 - y0) * s) / 2;
+  return (lat, lon) => [(lon * kx - x0) * s + ox, (-lat - y0) * s + oy];
+}
+
+function nearestKmPoint(pts, km) {
+  let best = pts[0], bd = Infinity;
+  for (const p of pts) { const d = Math.abs(p[2] - km); if (d < bd) { bd = d; best = p; } }
+  return best;
+}
+
+function drawMap(day, myKm) {
+  const svg = $("map"), W = 300, H = 190;
+  const d = RIDE.days[String(day)];
+  const pts = d.pts;
+  const proj = projector(pts, W, H, 16);
+
+  // Split the line at the rider so travelled road reads solid, the rest ghosted.
+  const done = [], todo = [];
+  for (const p of pts) (p[2] <= myKm ? done : todo).push(proj(p[0], p[1]));
+  if (done.length && todo.length) todo.unshift(done[done.length - 1]); // no gap at the seam
+  const path = (a) => a.length ? "M" + a.map(([x, y]) => `${x.toFixed(1)} ${y.toFixed(1)}`).join("L") : "";
+
+  const pois = RIDE.pois.filter(p => p.day === day);
+  const parts = [];
+  parts.push(`<path class="rt-todo" d="${path(myKm > 0 ? todo : pts.map(p => proj(p[0], p[1])))}"/>`);
+  if (myKm > 0) parts.push(`<path class="rt-done" d="${path(done)}"/>`);
+
+  // Labels are placed greedily and skipped when they'd collide. The route loops back on
+  // itself, so towns far apart in kilometres can sit on top of each other on screen —
+  // spacing them by route distance isn't enough; this tests the actual drawn boxes.
+  const placed = [];
+  const CH = 4.6, LH = 9; // approx per-char width and line height at 9px
+  const fits = (x, y, name) => {
+    const w = name.length * CH;
+    const box = { x0: x - w / 2, x1: x + w / 2, y0: y - LH, y1: y };
+    if (box.x0 < 2 || box.x1 > W - 2) return false; // don't run off the edge
+    for (const p of placed) {
+      if (box.x0 < p.x1 + 3 && box.x1 > p.x0 - 3 && box.y0 < p.y1 + 2 && box.y1 > p.y0 - 2) return false;
+    }
+    placed.push(box);
+    return true;
+  };
+
+  // Endpoints first — they always win the space.
+  const a = proj(pts[0][0], pts[0][1]), b = proj(pts[pts.length - 1][0], pts[pts.length - 1][1]);
+  parts.push(`<circle cx="${a[0].toFixed(1)}" cy="${a[1].toFixed(1)}" r="2.4" fill="#111114"/>`);
+  parts.push(`<circle cx="${b[0].toFixed(1)}" cy="${b[1].toFixed(1)}" r="2.4" fill="#111114"/>`);
+  for (const [xy, nm] of [[a, d.from], [b, d.to]]) {
+    fits(xy[0], xy[1] - 6, nm);
+    parts.push(`<text class="endlbl" x="${xy[0].toFixed(1)}" y="${(xy[1] - 6).toFixed(1)}" text-anchor="middle">${nm}</text>`);
+  }
+
+  // Towns, in route order, dropping any that can't be placed cleanly.
+  for (const t of d.towns) {
+    if (t.name === d.from || t.name === d.to) continue; // already an endpoint
+    const p = nearestKmPoint(pts, t.km), xy = proj(p[0], p[1]);
+    const ly = xy[1] + 11;
+    if (!fits(xy[0], ly, t.name)) continue;
+    parts.push(`<text class="townlbl" x="${xy[0].toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="middle">${t.name}</text>`);
+  }
+
+  // POIs — small dot, generous invisible tap target over it
+  for (const p of pois) {
+    const xy = proj(p.lat, p.lon);
+    const cls = SEL === p.id ? "poi sel" : "poi";
+    parts.push(`<circle class="${cls}" cx="${xy[0].toFixed(1)}" cy="${xy[1].toFixed(1)}" r="2"/>`);
+    parts.push(`<circle class="poi-hit" data-poi="${p.id}" cx="${xy[0].toFixed(1)}" cy="${xy[1].toFixed(1)}" r="9"
+      tabindex="0" role="button" aria-label="${p.name}"><title>${p.name}</title></circle>`);
+  }
+
+  // The rider
+  if (myKm > 0) {
+    const p = nearestKmPoint(pts, myKm), xy = proj(p[0], p[1]);
+    parts.push(`<circle class="me-ring" cx="${xy[0].toFixed(1)}" cy="${xy[1].toFixed(1)}" r="6"/>`);
+    parts.push(`<circle class="me" cx="${xy[0].toFixed(1)}" cy="${xy[1].toFixed(1)}" r="3.4"/>`);
+  }
+
+  svg.innerHTML = parts.join("");
+  svg.querySelectorAll("[data-poi]").forEach(el => {
+    const pick = () => selectPoi(Number(el.dataset.poi), day, myKm);
+    el.addEventListener("click", pick);
+    el.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(); } });
+  });
+}
+
+function selectPoi(id, day, myKm) {
+  SEL = SEL === id ? null : id;
+  const card = $("poicard");
+  if (SEL === null) { card.classList.remove("on"); drawMap(day, myKm); return; }
+  const p = RIDE.pois.find(x => x.id === id);
+  $("pcCat").textContent = `${CAT_CS[p.cat] ?? p.cat} · ${p.km} km · ${p.off} km od trasy`;
+  $("pcName").textContent = p.name;
+  $("pcHook").textContent = p.hook;
+  card.classList.add("on");
+  drawMap(day, myKm);
+}
+
+function renderFeed(posts) {
+  const feed = $("feed");
+  if (!posts.length) return;
+  feed.innerHTML = posts.map(p => {
+    const media = p.media_url
+      ? `<div class="media"><img src="${p.media_url}" alt="" loading="lazy"></div>` : "";
+    const said = p.body && p.kind !== "auto" ? `<div class="said">„${p.body}“</div>` : "";
+    const line = p.caption ? `<div class="line">${p.caption}</div>` : "";
+    return `<div class="entry"><div class="t">${hhmm(p.created_at)}</div>${line}${said}${media}</div>`;
+  }).join("");
+}
+
+function renderState(s) {
+  const day = s?.day ?? 1;
+  const d = RIDE.days[String(day)];
+  const myKm = Number(s?.day_km ?? 0);
+  const total = Number(s?.day_total_km ?? d.total_km);
+
+  $("dayname").textContent = `Den ${day}`;
+  $("kmnow").textContent = Math.round(myKm);
+  $("kmtot").textContent = Math.round(total);
+  $("endA").textContent = d.from;
+  $("endB").textContent = d.to;
+
+  const pct = total ? Math.min(100, (myKm / total) * 100) : 0;
+  $("fill").style.width = pct + "%";
+  $("marker").style.left = pct + "%";
+
+  const live = s && s.updated_at && (Date.now() - new Date(s.updated_at) < 20 * 60 * 1000);
+  $("dot").className = "dot " + (live ? "live" : "idle");
+  $("place").textContent = s?.place || d.from;
+
+  if (!s || !s.updated_at) {
+    $("statustxt").textContent = "čeká na start";
+    $("since").textContent = "";
+  } else if (s.stopped_since) {
+    $("statustxt").textContent = "stojí";
+    $("since").textContent = `nehnul se ${agoCs(s.stopped_since)}`;
+  } else if (live) {
+    $("statustxt").textContent = "jede";
+    $("since").textContent = "";
+  } else {
+    $("statustxt").textContent = "ticho po pěšině";
+    $("since").textContent = `naposledy ${agoCs(s.updated_at)}`;
+  }
+
+  $("sKm").textContent = Math.round(myKm);
+  $("sCars").textContent = s?.cars ?? 0;
+  $("sMov").textContent = hoursMins(s?.moving_secs ?? 0);
+  $("foot").textContent = s?.updated_at ? `aktualizováno ${hhmm(s.updated_at)}` : "";
+
+  drawMap(day, myKm);
+}
+
+async function sb(path) {
+  const r = await fetch(`${SB_URL}/rest/v1/${path}`, {
+    headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` },
+  });
+  if (!r.ok) throw new Error(`${r.status}`);
+  return r.json();
+}
+
+async function tick() {
+  try {
+    const [state, posts] = await Promise.all([
+      sb("ride_state?select=*&id=eq.1"),
+      sb("posts?select=*&order=created_at.desc&limit=60"),
+    ]);
+    renderState(state[0]);
+    renderFeed(posts);
+  } catch (_e) { /* keep whatever is on screen; try again next tick */ }
+}
+
+(async function init() {
+  RIDE = await (await fetch("ride.json")).json();
+  $("rider").textContent = RIDE.rider;
+  $("routeline").textContent = RIDE.title;
+  renderState(null);
+  await tick();
+  setInterval(tick, 30000);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) tick(); });
+})();
+</script>
+</body>
+</html>

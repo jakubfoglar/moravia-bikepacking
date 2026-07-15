@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Post</title>
+<style>
+  :root{ --bg:#FFFFFF; --ink:#111114; --muted:#70737A; --line:#EAEBED; --faint:#F5F6F7; --accent:#E4342B; color-scheme:light; }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; background:var(--bg); }
+  .wrap{ max-width:440px; margin:0 auto; padding:34px 22px 40px;
+    font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Helvetica,Arial,sans-serif;
+    color:var(--ink); -webkit-font-smoothing:antialiased; }
+  h1{ font-size:15px; font-weight:600; margin:0; letter-spacing:-0.01em; }
+  .sub{ font-size:13px; color:var(--muted); margin-top:1px; }
+
+  .shot{ margin-top:26px; display:block; width:100%; aspect-ratio:4/3; border:1px solid var(--line);
+    border-radius:6px; background:var(--faint); cursor:pointer; overflow:hidden; position:relative; }
+  .shot img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .shot .ph{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-size:14px; color:var(--muted); }
+  input[type=file]{ display:none; }
+
+  textarea{ width:100%; margin-top:14px; padding:12px; border:1px solid var(--line); border-radius:6px;
+    font:inherit; font-size:15px; color:var(--ink); background:var(--bg); resize:none; min-height:76px; }
+  textarea:focus{ outline:none; border-color:var(--ink); }
+
+  button{ margin-top:14px; width:100%; padding:15px; border:none; border-radius:6px; background:var(--ink);
+    color:#fff; font:inherit; font-size:15px; font-weight:600; cursor:pointer; }
+  button:disabled{ background:var(--line); color:var(--muted); cursor:default; }
+
+  .msg{ margin-top:16px; font-size:14px; line-height:1.45; min-height:20px; }
+  .msg.err{ color:var(--accent); }
+  .quip{ margin-top:16px; padding:13px 14px; background:var(--faint); border-radius:6px; display:none; }
+  .quip.on{ display:block; }
+  .quip .qk{ font-size:10px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); }
+  .quip .qv{ font-size:15px; line-height:1.42; margin-top:4px; }
+  .gate{ margin-top:26px; font-size:14px; color:var(--muted); line-height:1.5; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Post</h1>
+  <div class="sub">Břeclav → Otrokovice</div>
+
+  <div id="app" hidden>
+    <label class="shot" for="file" id="shot">
+      <div class="ph" id="ph">Vyfotit</div>
+      <img id="prev" hidden alt="">
+    </label>
+    <input type="file" id="file" accept="image/*" capture="environment">
+
+    <textarea id="body" placeholder="Něco k tomu? (nemusí být)"></textarea>
+    <button id="send" disabled>Poslat</button>
+
+    <div class="msg" id="msg"></div>
+    <div class="quip" id="quip"><div class="qk">Fable</div><div class="qv" id="quipv"></div></div>
+  </div>
+
+  <div class="gate" id="gate">Chybí klíč. Otevři odkaz i s částí za <b>#</b>.</div>
+</div>
+
+<script>
+const SB_URL = "https://nqtvcxztuuoywznxrxga.supabase.co";
+const KEY_STORE = "trip-secret";
+
+// Secret rides in the URL fragment: browsers never send it to any server, and it
+// stays out of the repo. Once opened on the phone it's remembered locally.
+let secret = location.hash.slice(1) || localStorage.getItem(KEY_STORE) || "";
+if (location.hash.slice(1)) {
+  localStorage.setItem(KEY_STORE, location.hash.slice(1));
+  history.replaceState(null, "", location.pathname); // don't leave it in the address bar
+}
+if (secret) { document.getElementById("app").hidden = false; document.getElementById("gate").hidden = true; }
+
+const $ = (id) => document.getElementById(id);
+let b64 = null, mime = null;
+
+// Phone photos are ~4MB; downscale before upload so it flies on a rural LTE bar.
+function shrink(file) {
+  return new Promise((res) => {
+    const img = new Image();
+    img.onload = () => {
+      const max = 1600, s = Math.min(1, max / Math.max(img.width, img.height));
+      const c = document.createElement("canvas");
+      c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      res(c.toDataURL("image/jpeg", 0.82));
+    };
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+$("file").addEventListener("change", async (e) => {
+  const f = e.target.files[0];
+  if (!f) return;
+  const url = await shrink(f);
+  b64 = url.split(",")[1]; mime = "image/jpeg";
+  $("prev").src = url; $("prev").hidden = false; $("ph").hidden = true;
+  $("send").disabled = false;
+});
+
+$("body").addEventListener("input", () => {
+  $("send").disabled = !b64 && !$("body").value.trim();
+});
+
+$("send").addEventListener("click", async () => {
+  $("send").disabled = true;
+  $("msg").className = "msg"; $("msg").textContent = "Posílám…";
+  $("quip").classList.remove("on");
+  try {
+    const r = await fetch(`${SB_URL}/functions/v1/ingest`, {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-trip-secret": secret },
+      body: JSON.stringify({
+        kind: b64 ? "photo" : "text",
+        body: $("body").value.trim() || null,
+        media_b64: b64, media_type: mime,
+      }),
+    });
+    if (!r.ok) throw new Error(r.status === 401 ? "Špatný klíč." : `Chyba ${r.status}`);
+    const d = await r.json();
+    $("msg").textContent = "Hotovo.";
+    if (d.caption) { $("quipv").textContent = d.caption; $("quip").classList.add("on"); }
+    b64 = null; $("prev").hidden = true; $("ph").hidden = false; $("body").value = ""; $("file").value = "";
+  } catch (err) {
+    $("msg").className = "msg err";
+    $("msg").textContent = String(err.message || err);
+    $("send").disabled = false;
+  }
+});
+</script>
+</body>
+</html>
