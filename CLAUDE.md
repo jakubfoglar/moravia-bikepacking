@@ -53,6 +53,12 @@ When `TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID` are set as Supabase secrets, `ing
 
 ## Lessons learned (things that bit us — don't repeat)
 - **`OnHttpResponse.MAX_REQUEST_SIZE` is exactly 100_000 bytes** and Karoo HTTP goes over the *Companion* link — so ride events and finger-sketches post without WiFi, but photos can't (they come from the phone instead). `waitForConnection = true` queues rather than drops.
+- **Always `withTimeoutOrNull` around a `suspendCancellableCoroutine` over Karoo HTTP.** A queued request whose response never arrives suspends forever, and because `RideNarrator` ticks serially, one hang silently stops *every* future post for the rest of the trip — no error, the site just goes quiet.
+- **On Fable, `max_tokens` covers thinking + reply** (thinking is always on, and can't be disabled). 300 was enough to truncate an image caption mid-sentence. Use ~2000 and treat `stop_reason == "max_tokens"` as a fallback — we're billed for tokens produced, not the ceiling.
+- **The narrator's `object` state is process-lifetime — persist anything you'd hate to re-fire.** A mid-ride reboot otherwise re-posts "Vyrazil jsem." at km 80 and zeroes saddle time; leaving the Karoo on overnight carries Day 1's fired flags into Day 2 and robs it of its finish post. State is keyed by day and saved to prefs on the 2-min tick.
+- **A frozen GPS position is indistinguishable from standing still** — without a freshness check, riding under tree cover publishes "Stojím. Nejspíš jím." Hence `AppState.locAt`.
+- **Anything that bypasses the post floor needs its own guard.** The train verdict drifts across the 15/22 km/h thresholds continuously; riding near one flip-flopped GREEN↔AMBER every tick, each a post. Now requires two consecutive ticks.
+- **Gate the narrator on the trip dates.** Otherwise switching the Karoo on at home snaps your position to the nearest track point and tells your wife you're near Kyjov.
 - **A public Supabase bucket needs no SELECT policy.** Adding one doesn't enable image URLs (those already work) — it only lets anyone *list* every file in the bucket. Don't add it back.
 - **Map labels must be de-collided in screen space, not route-km space.** Day 2 is a loop: towns 60 km apart on the route sit on top of each other on the map.
 - **RemoteViews allows only specific widgets.** A bare `<View>` broke inflation → **black field**. Use a 1dp `TextView` for dividers. No `ScrollView`/scrolling in fields (that's why the POI card is glance-only with a separate Reading pane).

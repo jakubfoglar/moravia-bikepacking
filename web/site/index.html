@@ -246,15 +246,27 @@ function selectPoi(id, day, myKm) {
   drawMap(day, myKm);
 }
 
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) =>
+  ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+const DAYNAME = ["ne", "po", "út", "st", "čt", "pá", "so"];
+
+/** On Saturday, Friday's posts would otherwise read as if they happened today. */
+function stamp(iso) {
+  const d = new Date(iso), now = new Date();
+  const sameDay = d.toDateString() === now.toDateString();
+  return sameDay ? hhmm(iso) : `${DAYNAME[d.getDay()]} ${hhmm(iso)}`;
+}
+
 function renderFeed(posts) {
   const feed = $("feed");
   if (!posts.length) return;
   feed.innerHTML = posts.map(p => {
     const media = p.media_url
-      ? `<div class="media"><img src="${p.media_url}" alt="" loading="lazy"></div>` : "";
-    const said = p.body && p.kind !== "auto" ? `<div class="said">„${p.body}“</div>` : "";
-    const line = p.caption ? `<div class="line">${p.caption}</div>` : "";
-    return `<div class="entry"><div class="t">${hhmm(p.created_at)}</div>${line}${said}${media}</div>`;
+      ? `<div class="media"><img src="${esc(p.media_url)}" alt="" loading="lazy"></div>` : "";
+    const said = p.body && p.kind !== "auto" ? `<div class="said">„${esc(p.body)}“</div>` : "";
+    const line = p.caption ? `<div class="line">${esc(p.caption)}</div>` : "";
+    return `<div class="entry"><div class="t">${stamp(p.created_at)}</div>${line}${said}${media}</div>`;
   }).join("");
 }
 
@@ -278,18 +290,21 @@ function renderState(s) {
   $("dot").className = "dot " + (live ? "live" : "idle");
   $("place").textContent = s?.place || d.from;
 
+  // Staleness is checked before stopped_since: if the Karoo dies while he's stopped, the
+  // last state we ever got says "stopped", and we'd otherwise show "nehnul se 6 h" forever
+  // as though we still knew something.
   if (!s || !s.updated_at) {
     $("statustxt").textContent = "čeká na start";
     $("since").textContent = "";
+  } else if (!live) {
+    $("statustxt").textContent = "ticho po pěšině";
+    $("since").textContent = `naposledy ${agoCs(s.updated_at)}`;
   } else if (s.stopped_since) {
     $("statustxt").textContent = "stojí";
     $("since").textContent = `nehnul se ${agoCs(s.stopped_since)}`;
-  } else if (live) {
+  } else {
     $("statustxt").textContent = "jede";
     $("since").textContent = "";
-  } else {
-    $("statustxt").textContent = "ticho po pěšině";
-    $("since").textContent = `naposledy ${agoCs(s.updated_at)}`;
   }
 
   $("sKm").textContent = Math.round(myKm);
@@ -312,7 +327,7 @@ async function tick() {
   try {
     const [state, posts] = await Promise.all([
       sb("ride_state?select=*&id=eq.1"),
-      sb("posts?select=*&order=created_at.desc&limit=60"),
+      sb("posts?select=*&order=created_at.desc&limit=200"),
     ]);
     renderState(state[0]);
     renderFeed(posts);
@@ -320,7 +335,15 @@ async function tick() {
 }
 
 (async function init() {
-  RIDE = await (await fetch("ride.json")).json();
+  // Retry rather than die: a single failed fetch here would otherwise leave a permanently
+  // blank page with no way back except a manual reload.
+  for (let i = 0; !RIDE; i++) {
+    try {
+      RIDE = await (await fetch("ride.json", { cache: "no-cache" })).json();
+    } catch (_e) {
+      await new Promise((r) => setTimeout(r, Math.min(30000, 2000 * (i + 1))));
+    }
+  }
   $("rider").textContent = RIDE.rider;
   $("routeline").textContent = RIDE.title;
   renderState(null);

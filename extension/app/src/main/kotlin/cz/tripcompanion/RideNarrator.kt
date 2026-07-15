@@ -7,8 +7,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.Instant
+import java.time.LocalDate
 import java.time.LocalTime
-import kotlin.math.abs
 import kotlin.math.roundToInt
 
 /**
@@ -29,9 +29,15 @@ object RideNarrator {
     private const val MOVE_M = 25.0 // GPS jitter below this isn't movement
     private const val POI_NEAR_M = 150.0
     private val CAR_MILESTONES = listOf(10, 25, 50, 100, 150, 200)
+    private val TRIP_START = LocalDate.of(2026, 7, 31)
+    private val TRIP_END = LocalDate.of(2026, 8, 1)
+
+    private const val GPS_STALE_MS = 120_000L // no fix for this long ⇒ don't trust "not moving"
+    private const val PREFS = "narrator"
 
     private var job: Job? = null
 
+    private var day = 0
     private var startedKm = -1.0
     private var movingSecs = 0
     private var lastMoveMs = 0L
@@ -47,11 +53,13 @@ object RideNarrator {
     private var firedFinish = false
     private var firedStop = false
     private var lastVerdict: Verdict? = null
+    private var pendingVerdict: Verdict? = null // must hold for 2 ticks before we post it
 
     fun start(karoo: KarooSystemService, ctx: Context, scope: CoroutineScope) {
         if (job != null) return
         job = scope.launch {
-            Logger.log("narrator", "started")
+            load(ctx)
+            Logger.log("narrator", "started (day=$day, movingSecs=$movingSecs, start=$firedStart)")
             while (true) {
                 try {
                     tick(karoo, ctx)
@@ -67,12 +75,56 @@ object RideNarrator {
         job?.cancel(); job = null
     }
 
+    /**
+     * Everything here is process-lifetime state, so a mid-ride reboot (or the OS killing the
+     * service) would otherwise re-fire "Vyrazil jsem." at km 80 and zero the saddle time.
+     * Persisted alongside each state ping and reloaded on start. Keyed by day, so leaving the
+     * Karoo on overnight doesn't carry Day 1's "already finished" flags into Day 2.
+     */
+    private fun prefs(ctx: Context) = ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+
+    private fun save(ctx: Context) = prefs(ctx).edit().apply {
+        putInt("day", day)
+        putFloat("startedKm", startedKm.toFloat())
+        putInt("movingSecs", movingSecs)
+        putBoolean("firedStart", firedStart)
+        putBoolean("firedFinish", firedFinish)
+        putStringSet("firedQuarters", firedQuarters.map { it.toString() }.toSet())
+        putStringSet("firedPois", firedPois.map { it.toString() }.toSet())
+        putStringSet("firedCars", firedCars.map { it.toString() }.toSet())
+    }.apply()
+
+    private fun load(ctx: Context) = prefs(ctx).run {
+        day = getInt("day", 0)
+        startedKm = getFloat("startedKm", -1f).toDouble()
+        movingSecs = getInt("movingSecs", 0)
+        firedStart = getBoolean("firedStart", false)
+        firedFinish = getBoolean("firedFinish", false)
+        firedQuarters.clear(); getStringSet("firedQuarters", emptySet())?.forEach { firedQuarters.add(it.toInt()) }
+        firedPois.clear(); getStringSet("firedPois", emptySet())?.forEach { firedPois.add(it.toInt()) }
+        firedCars.clear(); getStringSet("firedCars", emptySet())?.forEach { firedCars.add(it.toInt()) }
+    }
+
+    private fun resetForDay(ctx: Context, newDay: Int) {
+        Logger.log("narrator", "new day $day → $newDay, resetting")
+        day = newDay
+        startedKm = -1.0; movingSecs = 0; lastMoveMs = 0L; stoppedSince = null
+        lastLat = null; lastLon = null; lastAutoMs = 0L
+        firedQuarters.clear(); firedPois.clear(); firedCars.clear()
+        firedStart = false; firedFinish = false; firedStop = false
+        lastVerdict = null; pendingVerdict = null
+        save(ctx)
+    }
+
     private suspend fun tick(karoo: KarooSystemService, ctx: Context) {
         if (!TripPoster.postingEnabled(ctx)) return
+        if (!onTrip(ctx)) return
         val st = AppState.flow.value
         if (!st.located || st.lat == null || st.lon == null) return
 
-        val day = TripSettings.effectiveDay(ctx)
+        val today = TripSettings.effectiveDay(ctx)
+        if (today != day) resetForDay(ctx, today)
+
         val track = PoiRepository.dayTrack(day)
         if (track.isEmpty()) return
         val totalKm = PoiRepository.dayTotalKm(day)
@@ -80,18 +132,27 @@ object RideNarrator {
         val now = System.currentTimeMillis()
         if (startedKm < 0) startedKm = myKm
 
+        // A lost fix freezes lat/lon, which looks exactly like standing still — without this
+        // guard, ten minutes under tree cover publishes "Stojím. Nejspíš jím."
+        val gpsFresh = st.locAt > 0 && now - st.locAt < GPS_STALE_MS
+
         // --- movement bookkeeping ---
-        val moved = lastLat?.let { RouteMath.haversine(it, lastLon!!, st.lat, st.lon) * 1000.0 } ?: 0.0
-        if (moved > MOVE_M) {
-            if (lastMoveMs > 0) movingSecs += ((now - lastMoveMs) / 1000).toInt().coerceAtMost(60)
+        if (gpsFresh) {
+            val moved = lastLat?.let { RouteMath.haversine(it, lastLon!!, st.lat, st.lon) * 1000.0 } ?: 0.0
+            if (moved > MOVE_M) {
+                if (lastMoveMs > 0) movingSecs += ((now - lastMoveMs) / 1000).toInt().coerceAtMost(60)
+                lastMoveMs = now
+                stoppedSince = null
+                firedStop = false
+            } else if (lastMoveMs > 0 && now - lastMoveMs > STOP_AFTER_MS && stoppedSince == null) {
+                stoppedSince = lastMoveMs
+            }
+            if (lastMoveMs == 0L) lastMoveMs = now
+            lastLat = st.lat; lastLon = st.lon
+        } else {
+            // Don't accrue a fake stop across the outage.
             lastMoveMs = now
-            stoppedSince = null
-            firedStop = false
-        } else if (lastMoveMs > 0 && now - lastMoveMs > STOP_AFTER_MS && stoppedSince == null) {
-            stoppedSince = lastMoveMs
         }
-        if (lastMoveMs == 0L) lastMoveMs = now
-        lastLat = st.lat; lastLon = st.lon
 
         val cars = if (TripSettings.radarEnabled(ctx)) RadarEngine.flow.value.count else 0
         val verdict = trainVerdict(ctx, day, st)
@@ -99,6 +160,7 @@ object RideNarrator {
         // --- the "now" block: cheap, frequent, not a post ---
         if (now - lastStateMs > STATE_EVERY_MS) {
             lastStateMs = now
+            save(ctx) // piggyback the state save on the same cadence
             TripPoster.send(
                 karoo, ctx,
                 TripPoster.state(
@@ -126,13 +188,23 @@ object RideNarrator {
             return
         }
 
+        // Verdict changes bypass the gap floor, so they need their own guard: `required` drifts
+        // continuously across the 15/22 km/h thresholds, and riding near one would otherwise
+        // flip GREEN↔AMBER every tick — each flip a post. Only act once it holds for two ticks.
         if (verdict != null && verdict != lastVerdict) {
-            val prev = lastVerdict
-            lastVerdict = verdict
-            if (prev != null) { // don't announce the very first reading, only changes
-                post(karoo, ctx, "train", mapOf("verdikt" to verdict.name.lowercase(), "zbyva_km" to round1(totalKm - myKm)), st, day, now)
-                return
+            if (verdict != pendingVerdict) {
+                pendingVerdict = verdict // first sighting: wait and see
+            } else {
+                val prev = lastVerdict
+                lastVerdict = verdict
+                pendingVerdict = null
+                if (prev != null) { // don't announce the first reading, only changes
+                    post(karoo, ctx, "train", mapOf("verdikt" to verdict.name.lowercase(), "zbyva_km" to round1(totalKm - myKm)), st, day, now)
+                    return
+                }
             }
+        } else if (verdict == lastVerdict) {
+            pendingVerdict = null
         }
 
         if (!gapOk) return
@@ -177,6 +249,18 @@ object RideNarrator {
         Logger.log("narrator", "post $event $facts")
         val r = TripPoster.send(karoo, ctx, TripPoster.autoEvent(event, facts, st.lat, st.lon, day))
         if (r.ok) lastAutoMs = now
+        save(ctx) // a fired flag must survive even if the very next thing is a reboot
+    }
+
+    /**
+     * Only narrate on the actual trip days. Otherwise powering the Karoo on at home would
+     * publish a position snapped to the nearest track point — telling my wife I'm somewhere
+     * near Kyjov while I'm on the sofa. A manual day override counts as "yes, I mean it".
+     */
+    private fun onTrip(ctx: Context): Boolean {
+        if (TripSettings.dayOverride(ctx) != 0) return true
+        val today = try { LocalDate.now() } catch (e: Exception) { return false }
+        return !today.isBefore(TRIP_START) && !today.isAfter(TRIP_END)
     }
 
     private fun trainVerdict(ctx: Context, day: Int, st: AppState.State): Verdict? {

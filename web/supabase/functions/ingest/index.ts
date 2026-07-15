@@ -101,8 +101,12 @@ async function caption(
   try {
     const res = await anthropic.beta.messages.create({
       model: "claude-fable-5",
-      max_tokens: 300,
-      // Fable's thinking is always on — do not send a `thinking` param.
+      // Fable's thinking is always on and shares max_tokens with the reply, so this
+      // has to be far bigger than the one sentence we want — at 300 an image post
+      // could spend the whole budget thinking and return a truncated caption.
+      // Costs nothing extra: we're billed on tokens produced, not the ceiling.
+      max_tokens: 2000,
+      // Do not send a `thinking` param — Fable rejects any explicit thinking config.
       output_config: { effort: "low" },
       betas: ["server-side-fallback-2026-06-01"],
       fallbacks: [{ model: "claude-opus-4-8" }],
@@ -110,13 +114,12 @@ async function caption(
       messages: [{ role: "user", content }],
     });
 
-    if (res.stop_reason === "refusal") {
-      return { text: FALLBACK[event ?? kind] ?? FALLBACK[kind] ?? "", source: "fallback" };
-    }
+    const fb = { text: FALLBACK[event ?? kind] ?? FALLBACK[kind] ?? "", source: "fallback" as const };
+    if (res.stop_reason === "refusal") return fb;
     const text = res.content.filter((b) => b.type === "text").map((b) => b.text).join(" ").trim();
-    return text
-      ? { text, source: "fable" }
-      : { text: FALLBACK[event ?? kind] ?? FALLBACK[kind] ?? "", source: "fallback" };
+    // A truncated caption is worse than a canned one — don't publish half a sentence.
+    if (!text || res.stop_reason === "max_tokens") return fb;
+    return { text, source: "fable" };
   } catch (_e) {
     return { text: FALLBACK[event ?? kind] ?? FALLBACK[kind] ?? "", source: "fallback" };
   }

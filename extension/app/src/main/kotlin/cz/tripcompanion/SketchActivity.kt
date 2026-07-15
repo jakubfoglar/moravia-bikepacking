@@ -43,13 +43,23 @@ class SketchActivity : Activity() {
 
         pad = findViewById(R.id.pad)
         status = findViewById(R.id.sk_status)
+
+        // Send stays disabled until the system service is actually connected — otherwise a
+        // quick draw-and-send would post through an unconnected service and just vanish.
+        val send = findViewById<Button>(R.id.sk_send)
+        send.isEnabled = false
         karoo = KarooSystemService(applicationContext)
-        karoo.connect { }
+        karoo.connect { connected ->
+            runOnUiThread {
+                send.isEnabled = connected
+                if (!connected) status.text = "Karoo service nepřipojen."
+            }
+        }
 
         findViewById<Button>(R.id.sk_undo).setOnClickListener { pad.undo() }
         findViewById<Button>(R.id.sk_clear).setOnClickListener { pad.clear(); status.text = "" }
         findViewById<Button>(R.id.sk_close).setOnClickListener { finish() }
-        findViewById<Button>(R.id.sk_send).setOnClickListener { send() }
+        send.setOnClickListener { send() }
     }
 
     private fun send() {

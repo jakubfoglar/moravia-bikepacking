@@ -5,6 +5,7 @@ import io.hammerhead.karooext.KarooSystemService
 import io.hammerhead.karooext.models.HttpResponseState
 import io.hammerhead.karooext.models.OnHttpResponse
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withTimeoutOrNull
 import org.json.JSONObject
 import kotlin.coroutines.resume
 
@@ -22,6 +23,7 @@ object TripPoster {
     private const val URL = "https://nqtvcxztuuoywznxrxga.supabase.co/functions/v1/ingest"
     private const val PREFS = "trip"
     private const val KEY_SECRET = "ingestSecret"
+    private const val TIMEOUT_MS = 90_000L
     const val FLAG_POSTING = "postingEnabled"
 
     fun secret(ctx: Context): String =
@@ -43,8 +45,22 @@ object TripPoster {
 
     data class Result(val ok: Boolean, val caption: String?, val error: String?)
 
-    /** One request. Suspends until the Karoo reports the response (or the link gives up). */
-    suspend fun send(karoo: KarooSystemService, ctx: Context, payload: JSONObject): Result {
+    /**
+     * One request. Suspends until the Karoo reports the response.
+     *
+     * Always returns within TIMEOUT_MS. That matters more than it looks: waitForConnection
+     * queues a request while the Companion link is down, and a queued request that never
+     * completes would suspend forever — and because RideNarrator ticks serially, one hang
+     * would silently stop every future post for the rest of the trip.
+     */
+    suspend fun send(karoo: KarooSystemService, ctx: Context, payload: JSONObject): Result =
+        withTimeoutOrNull(TIMEOUT_MS) { sendInner(karoo, ctx, payload) }
+            ?: Result(false, null, "timeout after ${TIMEOUT_MS / 1000}s").also {
+                lastError = it.error
+                Logger.log("poster", "timeout — link down?")
+            }
+
+    private suspend fun sendInner(karoo: KarooSystemService, ctx: Context, payload: JSONObject): Result {
         val sec = secret(ctx)
         if (sec.isEmpty()) {
             lastError = "no secret set"
