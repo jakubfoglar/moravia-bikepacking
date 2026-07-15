@@ -109,8 +109,11 @@ object Render {
     }
 
     // ---- Card (glance) ----
-    fun card(ctx: Context, poi: Poi, pos: Int, total: Int, remainingKm: Double?, located: Boolean, nearestMode: Boolean): RemoteViews {
+    fun card(ctx: Context, poi: Poi, pos: Int, total: Int, remainingKm: Double?, located: Boolean, nearestMode: Boolean, heightPx: Int = 0): RemoteViews {
         val rv = RemoteViews(ctx.packageName, R.layout.poi_catalog)
+        // Tapping anywhere on the card (outside the nav buttons) opens the full scrollable detail.
+        rv.setOnClickPendingIntent(R.id.card_root, pendingDetail(ctx, poi.id))
+        val compact = heightPx in 1..420 // short field → drop the overflow-prone middle
         setPhoto(ctx, rv, poi)
         setBadge(rv, poi)
         rv.setTextViewText(R.id.name, poi.name)
@@ -146,6 +149,11 @@ object Render {
             rv.setViewVisibility(R.id.more, View.GONE)
         }
 
+        if (compact) {
+            rv.setViewVisibility(R.id.divider, View.GONE)
+            rv.setViewVisibility(R.id.hook, View.GONE)
+            rv.setViewVisibility(R.id.more, View.GONE)
+        }
         rv.setTextViewText(R.id.cnt_label, if (nearestMode) "NEAREST AHEAD" else "ROUTE ORDER")
         rv.setTextViewText(R.id.cnt_value, "$pos / $total")
         rv.setOnClickPendingIntent(R.id.btn_prev, pendingNav(ctx, "prev", 1))
