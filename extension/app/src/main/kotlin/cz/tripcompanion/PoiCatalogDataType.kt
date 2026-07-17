@@ -15,14 +15,15 @@ import kotlinx.coroutines.launch
  */
 class PoiCatalogDataType(extension: String) : DataTypeImpl(extension, "poi-catalog") {
     override fun startView(context: Context, config: ViewConfig, emitter: ViewEmitter) {
-        Logger.log("catalog", "startView size=${config.viewSize} preview=${config.preview}")
+        Logger.log("catalog", "startView size=${config.viewSize} grid=${config.gridSize} preview=${config.preview}")
         val h = config.viewSize.second
+        val w = config.viewSize.first
         val job = CoroutineScope(Dispatchers.IO).launch {
             try {
                 PoiRepository.load(context)
                 AppState.flow.collect { st ->
                     try {
-                        emitter.updateView(render(context, st, h))
+                        emitter.updateView(render(context, st, h, w))
                     } catch (e: Exception) {
                         Logger.logError("catalog render", e)
                         emitter.updateView(Render.error(context, "Catalog render", e))
@@ -36,7 +37,7 @@ class PoiCatalogDataType(extension: String) : DataTypeImpl(extension, "poi-catal
         emitter.setCancellable { job.cancel() }
     }
 
-    private fun render(context: Context, st: AppState.State, heightPx: Int): android.widget.RemoteViews {
+    private fun render(context: Context, st: AppState.State, heightPx: Int, widthPx: Int): android.widget.RemoteViews {
         val day = TripSettings.effectiveDay(context)
         val pois = PoiRepository.poisForDay(day)
         if (pois.isEmpty()) return Render.error(context, "Catalog", IllegalStateException("no POIs for day $day"))
@@ -45,7 +46,7 @@ class PoiCatalogDataType(extension: String) : DataTypeImpl(extension, "poi-catal
 
         if (!st.located || st.lat == null || st.lon == null) {
             val idx = if (tiny) 0 else st.index.coerceIn(0, pois.size - 1)
-            return Render.card(context, pois[idx], idx + 1, pois.size, null, false, nearestMode = false, heightPx = heightPx)
+            return Render.card(context, pois[idx], idx + 1, pois.size, null, false, nearestMode = false, heightPx = heightPx, widthPx = widthPx)
         }
 
         val myKm = RouteMath.myRouteKm(st.lat, st.lon, PoiRepository.track)
@@ -53,6 +54,6 @@ class PoiCatalogDataType(extension: String) : DataTypeImpl(extension, "poi-catal
         if (ahead.isEmpty()) return Render.end(context, pois.size, tiny)
         val idx = if (tiny) 0 else st.index.coerceIn(0, ahead.size - 1)
         val a = ahead[idx]
-        return Render.card(context, a.poi, idx + 1, ahead.size, a.remainingKm, true, nearestMode = true, heightPx = heightPx)
+        return Render.card(context, a.poi, idx + 1, ahead.size, a.remainingKm, true, nearestMode = true, heightPx = heightPx, widthPx = widthPx)
     }
 }

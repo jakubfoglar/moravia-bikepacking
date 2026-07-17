@@ -144,13 +144,18 @@ object Render {
         return Pair(poi.hook, ink)
     }
 
-    // ---- Catalog card: TINY (<160 px) / MEDIUM (<420 px) / FULL, by field height ----
-    fun card(ctx: Context, poi: Poi, pos: Int, total: Int, remainingKm: Double?, located: Boolean, nearestMode: Boolean, heightPx: Int = 0): RemoteViews =
-        when {
+    // ---- Catalog card, tiered by BOTH dimensions of the slot ----
+    // Height decides tiny/medium/full; a narrow (half-width) slot never uses the wide FULL
+    // header — it drops to MEDIUM, which stacks and fits. widthPx==0 means "unknown" → treat
+    // as wide (don't downgrade). Full-width on a 480px screen ≈ 480; half ≈ 240; third ≈ 160.
+    fun card(ctx: Context, poi: Poi, pos: Int, total: Int, remainingKm: Double?, located: Boolean, nearestMode: Boolean, heightPx: Int = 0, widthPx: Int = 0): RemoteViews {
+        val narrow = widthPx in 1 until 340
+        return when {
             heightPx in 1 until 160 -> cardTiny(ctx, poi, remainingKm, located)
-            heightPx in 160 until 420 -> cardMedium(ctx, poi, remainingKm, located)
+            heightPx in 160 until 420 || narrow -> cardMedium(ctx, poi, remainingKm, located)
             else -> cardFull(ctx, poi, pos, total, remainingKm, located, nearestMode)
         }
+    }
 
     private fun cardTiny(ctx: Context, poi: Poi, remainingKm: Double?, located: Boolean): RemoteViews {
         val rv = RemoteViews(ctx.packageName, R.layout.poi_catalog_tiny)

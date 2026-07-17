@@ -13,14 +13,21 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.TripCompanion">
 
+        <!-- Launcher = the catalog list. The old setup/debug screen is now MainActivity,
+             opened from the gear top-right. -->
         <activity
-            android:name=".MainActivity"
-            android:exported="true">
+            android:name=".CatalogActivity"
+            android:exported="true"
+            android:theme="@style/Theme.TripCompanion.PoiDetail">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="false" />
 
         <!-- Own task (empty taskAffinity) so Back returns to the ride screen it was opened
              from, not the app's home. singleTask + onNewIntent lets a fresh card tap
