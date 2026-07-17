@@ -89,6 +89,24 @@ OnNavigationState → NavigatingRoute
 
 **Drop entirely:** baked POIs, Train Catcher, Day Overview, Radar, Ride Narrator, follow-website, Sketch, the day concept.
 
+## Native UI reuse & style-matching (verified from hammerheadnav/karoo-ext)
+
+**The SDK exposes no UI** — `:lib` ships 0 resources (no styles/themes/buttons/type/components); the sample app uses a generic AppCompat theme. So all our Activity UI (list, detail, settings, dialogs, menus) is **custom-composed** — nothing native is reusable there. The native Karoo screens are Hammerhead's private app.
+- **The one real reuse: `Symbol.POI` map markers** = the Karoo map's own typed POI icons (fork/knife, bed, bell, tower…), rendered on the native map, pixel-identical to native — P4 uses this.
+- Data **fields** inherit the native ride chrome (system font/background) but the layout is ours.
+- The sample builds fields with **Glance** (Compose→RemoteViews); same widget limits, no native components — our plain-RemoteViews choice loses nothing.
+
+**Native patterns to replicate in the P5/P6 UI pass** (from on-device screenshots — build these as reusable styled components in our code):
+- **Top bar:** left icon (search/back) · centered UPPERCASE title · right ⋯ or action. Hairline divider under.
+- **Section headers:** UPPERCASE, muted grey, letter-spaced, on a faint grey band (e.g. `MANAGE ROUTE`, `SURFACES`, `SORT RIDES BY`).
+- **List rows:** left icon · label · optional right value/chevron; **destructive rows in red** (Delete); hairline dividers. Selected/active rows use a **full-width coloured highlight band** (Karoo yellow / orange / purple) with a small circular edit-pencil button at the right.
+- **Checklist rows:** green ✓ / red ✗ glyph + label (for on/off states).
+- **Cards:** rounded, map-thumbnail + title + a stats row (icon+value pairs: distance, ascent) + a menu affordance.
+- **Bottom bar = the hardware buttons:** large circular **← (back) bottom-left** and a filled **✓ / SELECT pill bottom-right** — always aligned to the physical buttons.
+- **Modal dialog** (e.g. sort): white rounded card over a dimmed scrim, UPPERCASE title, **radio-button rows** (green filled dot = selected), **CANCEL / CONFIRM** text buttons bottom row.
+- **Segmented bar** (surfaces): a horizontal bar split into coloured proportions + an icon+label+% legend below — a pattern we can reuse for e.g. category mix.
+These + the palette/type already in `colors.xml`/spec are the whole recipe; fidelity is hand-matching, not a library.
+
 ## Backend
 
 New Supabase project `waybook` (same stack as the trip's `ingest`): Postgres + Storage-free (photos hotlink) + edge functions. Tables: `catalogs(corridor_hash pk, kind, body jsonb, built_at)`, `enrichment(entity_id pk, extract, image_url, image_attr, sitelinks, fetched_at)` (permanent), `quota(device_uuid, day, count)`. Async build via `EdgeRuntime.waitUntil`. Abuse gate: static app token + per-device daily cap + **global daily circuit-breaker** (cold-build count + LLM-spend cap → serve cache-only when tripped). Overpass politeness: descriptive User-Agent + contact, honour `Retry-After`, 1 build in-flight per mirror, rotate mirrors; self-host only if it grows past ~500 builds/day.
