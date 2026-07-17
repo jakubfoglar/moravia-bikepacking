@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:text="@string/sketch_title"
         android:textColor="#14141A"
-        android:textSize="14sp"
+        android:textSize="11sp"
         android:textStyle="bold" />
 
     <!-- The pad takes all the room left over after the title, status and buttons. -->
@@ -31,7 +31,7 @@
         android:maxLines="2"
         android:ellipsize="end"
         android:textColor="#5A5A60"
-        android:textSize="13sp"
+        android:textSize="10sp"
         android:text="" />
 
     <LinearLayout
@@ -45,7 +45,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:textSize="13sp"
+            android:textSize="11sp"
             android:text="@string/sketch_undo" />
 
         <Button
@@ -54,7 +54,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginStart="6dp"
-            android:textSize="13sp"
+            android:textSize="11sp"
             android:text="@string/sketch_clear" />
 
         <Button
@@ -63,7 +63,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginStart="6dp"
-            android:textSize="13sp"
+            android:textSize="11sp"
             android:text="@string/sketch_close" />
 
         <Button
@@ -72,7 +72,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1.3"
             android:layout_marginStart="6dp"
-            android:textSize="13sp"
+            android:textSize="11sp"
             android:textStyle="bold"
             android:text="@string/sketch_send" />
     </LinearLayout>

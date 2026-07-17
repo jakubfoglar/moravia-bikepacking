@@ -148,18 +148,20 @@ object Render {
     // Height decides tiny/medium/full; a narrow (half-width) slot never uses the wide FULL
     // header — it drops to MEDIUM, which stacks and fits. widthPx==0 means "unknown" → treat
     // as wide (don't downgrade). Full-width on a 480px screen ≈ 480; half ≈ 240; third ≈ 160.
-    fun card(ctx: Context, poi: Poi, pos: Int, total: Int, remainingKm: Double?, located: Boolean, nearestMode: Boolean, heightPx: Int = 0, widthPx: Int = 0): RemoteViews {
+    // preview = the Karoo page editor: no click PendingIntents at all, or the field can only
+    // be dragged by its name (a full-bleed click target captures the editor's touches).
+    fun card(ctx: Context, poi: Poi, pos: Int, total: Int, remainingKm: Double?, located: Boolean, nearestMode: Boolean, heightPx: Int = 0, widthPx: Int = 0, preview: Boolean = false): RemoteViews {
         val narrow = widthPx in 1 until 340
         return when {
-            heightPx in 1 until 160 -> cardTiny(ctx, poi, remainingKm, located)
-            heightPx in 160 until 420 || narrow -> cardMedium(ctx, poi, remainingKm, located)
-            else -> cardFull(ctx, poi, pos, total, remainingKm, located, nearestMode)
+            heightPx in 1 until 160 -> cardTiny(ctx, poi, remainingKm, located, preview)
+            heightPx in 160 until 420 || narrow -> cardMedium(ctx, poi, remainingKm, located, preview)
+            else -> cardFull(ctx, poi, pos, total, remainingKm, located, nearestMode, preview)
         }
     }
 
-    private fun cardTiny(ctx: Context, poi: Poi, remainingKm: Double?, located: Boolean): RemoteViews {
+    private fun cardTiny(ctx: Context, poi: Poi, remainingKm: Double?, located: Boolean, preview: Boolean): RemoteViews {
         val rv = RemoteViews(ctx.packageName, R.layout.poi_catalog_tiny)
-        rv.setOnClickPendingIntent(R.id.card_root, pendingDetail(ctx, poi.id))
+        if (!preview) rv.setOnClickPendingIntent(R.id.card_root, pendingDetail(ctx, poi.id))
         setPhoto(ctx, rv, poi)
         rv.setTextViewText(R.id.name, poi.name)
         rv.setTextViewText(
@@ -170,9 +172,9 @@ object Render {
         return rv
     }
 
-    private fun cardMedium(ctx: Context, poi: Poi, remainingKm: Double?, located: Boolean): RemoteViews {
+    private fun cardMedium(ctx: Context, poi: Poi, remainingKm: Double?, located: Boolean, preview: Boolean): RemoteViews {
         val rv = RemoteViews(ctx.packageName, R.layout.poi_catalog_medium)
-        rv.setOnClickPendingIntent(R.id.card_root, pendingDetail(ctx, poi.id))
+        if (!preview) rv.setOnClickPendingIntent(R.id.card_root, pendingDetail(ctx, poi.id))
         setPhoto(ctx, rv, poi)
         setBadge(ctx, rv, poi)
         rv.setTextViewText(R.id.name, poi.name)
@@ -180,15 +182,17 @@ object Render {
         rv.setTextViewText(R.id.hook, hook)
         rv.setTextColor(R.id.hook, hookColor)
         rv.setTextViewText(R.id.dist, distInline(ctx, remainingKm, located))
-        rv.setOnClickPendingIntent(R.id.btn_prev, pendingNav(ctx, "prev", 1))
-        rv.setOnClickPendingIntent(R.id.btn_next, pendingNav(ctx, "next", 2))
+        if (!preview) {
+            rv.setOnClickPendingIntent(R.id.btn_prev, pendingNav(ctx, "prev", 1))
+            rv.setOnClickPendingIntent(R.id.btn_next, pendingNav(ctx, "next", 2))
+        }
         return rv
     }
 
-    private fun cardFull(ctx: Context, poi: Poi, pos: Int, total: Int, remainingKm: Double?, located: Boolean, nearestMode: Boolean): RemoteViews {
+    private fun cardFull(ctx: Context, poi: Poi, pos: Int, total: Int, remainingKm: Double?, located: Boolean, nearestMode: Boolean, preview: Boolean): RemoteViews {
         val rv = RemoteViews(ctx.packageName, R.layout.poi_catalog)
         // Tapping anywhere on the card (outside the nav buttons) opens the full detail.
-        rv.setOnClickPendingIntent(R.id.card_root, pendingDetail(ctx, poi.id))
+        if (!preview) rv.setOnClickPendingIntent(R.id.card_root, pendingDetail(ctx, poi.id))
         setPhoto(ctx, rv, poi)
         setBadge(ctx, rv, poi)
         rv.setTextViewText(R.id.name, poi.name)
@@ -212,7 +216,7 @@ object Render {
         val hasMore = poi.blurb.isNotBlank() && poi.blurb != poi.hook
         if (hasMore) {
             rv.setViewVisibility(R.id.more, View.VISIBLE)
-            rv.setOnClickPendingIntent(R.id.more, pendingDetail(ctx, poi.id))
+            if (!preview) rv.setOnClickPendingIntent(R.id.more, pendingDetail(ctx, poi.id))
         } else {
             rv.setViewVisibility(R.id.more, View.GONE)
         }
@@ -222,8 +226,10 @@ object Render {
             ctx.getString(if (nearestMode) R.string.fld_order_ahead else R.string.fld_order_route),
         )
         rv.setTextViewText(R.id.cnt_value, "$pos / $total")
-        rv.setOnClickPendingIntent(R.id.btn_prev, pendingNav(ctx, "prev", 1))
-        rv.setOnClickPendingIntent(R.id.btn_next, pendingNav(ctx, "next", 2))
+        if (!preview) {
+            rv.setOnClickPendingIntent(R.id.btn_prev, pendingNav(ctx, "prev", 1))
+            rv.setOnClickPendingIntent(R.id.btn_next, pendingNav(ctx, "next", 2))
+        }
         return rv
     }
 

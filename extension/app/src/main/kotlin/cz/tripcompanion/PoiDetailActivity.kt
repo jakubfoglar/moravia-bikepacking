@@ -1,7 +1,6 @@
 package cz.tripcompanion
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -57,7 +56,12 @@ class PoiDetailActivity : AppCompatActivity() {
         } else {
             dayPois
         }
-        if (order.isEmpty()) order = PoiRepository.pois.filter { it.id == startId }
+        // A POI tapped in the app's catalog list can be behind the rider or on the other day —
+        // it won't be in the nearest-ahead order. Fall back to the whole catalog in route order
+        // (always contains the tapped POI), so the detail never opens the wrong item.
+        if (order.none { it.id == startId }) {
+            order = PoiRepository.pois.sortedWith(compareBy({ it.day }, { it.routeKm }))
+        }
         idx = order.indexOfFirst { it.id == startId }.coerceAtLeast(0)
     }
 
@@ -123,13 +127,6 @@ class PoiDetailActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.d_next).apply {
             isEnabled = idx < order.size - 1
             alpha = if (idx < order.size - 1) 1f else 0.35f
-        }
-
-        findViewById<TextView>(R.id.d_maps).setOnClickListener {
-            open("https://www.google.com/maps/search/?api=1&query=${poi.lat},${poi.lon}")
-        }
-        findViewById<TextView>(R.id.d_mapy).setOnClickListener {
-            open("https://mapy.cz/turisticka?x=${poi.lon}&y=${poi.lat}&z=16")
         }
     }
 
@@ -224,11 +221,5 @@ class PoiDetailActivity : AppCompatActivity() {
         val raw = poi.hook.substringBefore("— from OpenStreetMap").trim().trimEnd('—').trim()
         if (raw.isBlank() || raw == poi.hook) return null // hand-written hooks are not cuisine lists
         return raw.replace(";", ", ")
-    }
-
-    private fun open(url: String) = try {
-        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
-    } catch (e: Exception) {
-        // no browser — ignore
     }
 }

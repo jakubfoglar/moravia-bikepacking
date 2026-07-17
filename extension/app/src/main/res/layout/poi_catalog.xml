@@ -33,7 +33,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center"
-                    android:textSize="44sp"
+                    android:textSize="26sp"
                     android:background="#2E7D32"
                     android:visibility="gone" />
             </FrameLayout>
@@ -49,7 +49,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="@color/k_muted"
-                    android:textSize="12sp"
+                    android:textSize="8sp"
                     android:textStyle="bold"
                     android:letterSpacing="0.08"
                     android:text="PAMÁTKA" />
@@ -61,7 +61,7 @@
                     android:maxLines="2"
                     android:ellipsize="end"
                     android:textColor="@color/k_ink"
-                    android:textSize="19sp"
+                    android:textSize="12sp"
                     android:textStyle="bold"
                     android:text="Name" />
                 <TextView
@@ -70,7 +70,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
                     android:textColor="@color/k_muted"
-                    android:textSize="13sp"
+                    android:textSize="10sp"
                     android:text="Lednice · 1. den" />
             </LinearLayout>
         </LinearLayout>
@@ -87,7 +87,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/k_ink"
-                android:textSize="34sp"
+                android:textSize="17sp"
                 android:textStyle="bold"
                 android:text="3,4" />
             <TextView
@@ -98,7 +98,7 @@
                 android:layout_marginBottom="5dp"
                 android:layout_gravity="bottom"
                 android:textColor="@color/k_muted"
-                android:textSize="15sp"
+                android:textSize="10sp"
                 android:text="km" />
         </LinearLayout>
 
@@ -121,7 +121,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:textColor="@color/k_muted"
-                android:textSize="15sp"
+                android:textSize="10sp"
                 android:text="@string/fld_gps" />
         </LinearLayout>
 
@@ -141,8 +141,8 @@
             android:maxLines="3"
             android:ellipsize="end"
             android:textColor="@color/k_ink"
-            android:textSize="15sp"
-            android:lineSpacingExtra="3dp"
+            android:textSize="10sp"
+            android:lineSpacingExtra="2dp"
             android:text="Proč tu zastavit" />
 
         <TextView
@@ -151,7 +151,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:textColor="@color/k_muted_dark"
-            android:textSize="14sp"
+            android:textSize="10sp"
             android:textStyle="bold"
             android:text="@string/fld_full_story" />
 
@@ -174,7 +174,7 @@
                 android:background="@drawable/pill_ghost"
                 android:textColor="@color/k_ink"
                 android:textStyle="bold"
-                android:textSize="20sp"
+                android:textSize="14sp"
                 android:gravity="center"
                 android:paddingLeft="26dp"
                 android:paddingRight="26dp"
@@ -192,7 +192,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="@color/k_muted"
-                    android:textSize="10sp"
+                    android:textSize="8sp"
                     android:textStyle="bold"
                     android:letterSpacing="0.08"
                     android:text="@string/fld_order_ahead" />
@@ -201,7 +201,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="@color/k_ink"
-                    android:textSize="14sp"
+                    android:textSize="10sp"
                     android:textStyle="bold"
                     android:text="5 / 79" />
             </LinearLayout>
@@ -212,7 +212,7 @@
                 android:background="@drawable/pill_action"
                 android:textColor="@color/k_ink"
                 android:textStyle="bold"
-                android:textSize="20sp"
+                android:textSize="14sp"
                 android:gravity="center"
                 android:paddingLeft="26dp"
                 android:paddingRight="26dp"

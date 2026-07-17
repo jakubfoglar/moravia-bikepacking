@@ -52,10 +52,10 @@ class CatalogActivity : AppCompatActivity() {
         return TextView(this).apply {
             text = label
             setTextColor(resources.getColor(R.color.k_muted, theme))
-            textSize = 13f
+            textSize = 9f // sp — calibrated for the Karoo's 2.0-density screen
             setTypeface(typeface, android.graphics.Typeface.BOLD)
             letterSpacing = 0.06f
-            setPadding(dp(18), dp(20), dp(18), dp(8))
+            setPadding(dp(18), dp(16), dp(18), dp(6))
         }
     }
 

@@ -31,7 +31,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center"
-                    android:textSize="26sp"
+                    android:textSize="20sp"
                     android:background="#2E7D32"
                     android:visibility="gone" />
             </FrameLayout>
@@ -47,7 +47,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="@color/k_muted"
-                    android:textSize="10sp"
+                    android:textSize="8sp"
                     android:textStyle="bold"
                     android:letterSpacing="0.08"
                     android:text="PAMÁTKA" />
@@ -59,7 +59,7 @@
                     android:maxLines="2"
                     android:ellipsize="end"
                     android:textColor="@color/k_ink"
-                    android:textSize="16sp"
+                    android:textSize="12sp"
                     android:textStyle="bold"
                     android:text="Name" />
             </LinearLayout>
@@ -73,7 +73,7 @@
             android:maxLines="2"
             android:ellipsize="end"
             android:textColor="@color/k_ink"
-            android:textSize="13sp"
+            android:textSize="10sp"
             android:text="Proč tu zastavit" />
 
         <TextView
@@ -93,7 +93,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:textColor="@color/k_ink"
-                android:textSize="21sp"
+                android:textSize="16sp"
                 android:textStyle="bold"
                 android:text="3,4 km" />
             <TextView
@@ -103,7 +103,7 @@
                 android:background="@drawable/pill_ghost"
                 android:textColor="@color/k_ink"
                 android:textStyle="bold"
-                android:textSize="17sp"
+                android:textSize="13sp"
                 android:gravity="center"
                 android:paddingLeft="20dp"
                 android:paddingRight="20dp"
@@ -118,7 +118,7 @@
                 android:background="@drawable/pill_action"
                 android:textColor="@color/k_ink"
                 android:textStyle="bold"
-                android:textSize="17sp"
+                android:textSize="13sp"
                 android:gravity="center"
                 android:paddingLeft="20dp"
                 android:paddingRight="20dp"

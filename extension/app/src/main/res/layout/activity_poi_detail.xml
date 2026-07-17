@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- POI detail, styled after the Karoo OS (480×800, white, Open Sans, uppercase grey labels,
-     hairline dividers, pill actions bottom-left/right where the physical buttons sit). -->
+<!-- POI detail, styled after the Karoo OS (480×800 @ density 2.0 → 1sp ≈ 2px; white, system
+     font, uppercase grey labels, hairline dividers, pill actions bottom-left/right where the
+     physical buttons sit). Sizes are calibrated against the native Karoo UI (~22–26px titles),
+     so they look small in a phone preview but right on-device. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -10,7 +12,7 @@
     <!-- Top bar: category icon + uppercase title, position counter right. -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="53dp"
+        android:layout_height="40dp"
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:paddingLeft="18dp"
@@ -19,7 +21,7 @@
             android:id="@+id/d_cat_icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="18sp"
+            android:textSize="14sp"
             android:text="🏰" />
         <TextView
             android:id="@+id/d_title"
@@ -30,7 +32,7 @@
             android:maxLines="1"
             android:ellipsize="end"
             android:textColor="@color/k_ink"
-            android:textSize="19sp"
+            android:textSize="12sp"
             android:textStyle="bold"
             android:letterSpacing="0.04"
             android:text="PAMÁTKA" />
@@ -39,7 +41,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/k_muted"
-            android:textSize="15sp"
+            android:textSize="12sp"
             android:textStyle="bold"
             android:text="3 / 12" />
     </LinearLayout>
@@ -59,7 +61,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingBottom="16dp">
 
             <ImageView
                 android:id="@+id/d_photo"
@@ -74,14 +77,14 @@
                 android:orientation="vertical"
                 android:paddingLeft="18dp"
                 android:paddingRight="18dp"
-                android:paddingTop="16dp">
+                android:paddingTop="12dp">
 
                 <TextView
                     android:id="@+id/d_name"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textColor="@color/k_ink"
-                    android:textSize="26sp"
+                    android:textSize="14sp"
                     android:textStyle="bold"
                     android:text="Zámek Lednice" />
 
@@ -89,9 +92,9 @@
                     android:id="@+id/d_meta"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
+                    android:layout_marginTop="3dp"
                     android:textColor="@color/k_muted"
-                    android:textSize="15sp"
+                    android:textSize="10sp"
                     android:text="Lednice · 1. den · odbočka 1,6 km" />
 
                 <!-- EAT/DRINK: the big live hours line ("Otevřeno do 20:00"). -->
@@ -99,9 +102,9 @@
                     android:id="@+id/d_hours_big"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
+                    android:layout_marginTop="10dp"
                     android:textColor="@color/k_green"
-                    android:textSize="23sp"
+                    android:textSize="13sp"
                     android:textStyle="bold"
                     android:visibility="gone"
                     android:text="Otevřeno do 20:00" />
@@ -111,10 +114,10 @@
                     android:id="@+id/d_blurb"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
+                    android:layout_marginTop="10dp"
                     android:textColor="@color/k_ink"
-                    android:textSize="19sp"
-                    android:lineSpacingExtra="7dp"
+                    android:textSize="10sp"
+                    android:lineSpacingExtra="3dp"
                     android:text="" />
             </LinearLayout>
 
@@ -122,7 +125,7 @@
                 android:id="@+id/d_rows_top_divider"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="12dp"
                 android:background="@color/k_divider_soft" />
 
             <!-- Practical rows (hours, admission, effort, cuisine, payment, phone, detour)
@@ -132,43 +135,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingLeft="18dp"
-                android:paddingRight="18dp"
-                android:paddingTop="14dp"
-                android:paddingBottom="16dp">
-                <TextView
-                    android:id="@+id/d_maps"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:background="@drawable/pill_ghost"
-                    android:gravity="center"
-                    android:textColor="@color/k_ink"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:paddingTop="13dp"
-                    android:paddingBottom="13dp"
-                    android:text="@string/det_maps_google" />
-                <TextView
-                    android:id="@+id/d_mapy"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="10dp"
-                    android:background="@drawable/pill_ghost"
-                    android:gravity="center"
-                    android:textColor="@color/k_ink"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:paddingTop="13dp"
-                    android:paddingBottom="13dp"
-                    android:text="@string/det_maps_mapy" />
-            </LinearLayout>
         </LinearLayout>
     </ScrollView>
 
@@ -185,20 +151,20 @@
         android:gravity="center_vertical"
         android:paddingLeft="18dp"
         android:paddingRight="18dp"
-        android:paddingTop="12dp"
-        android:paddingBottom="12dp">
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp">
         <TextView
             android:id="@+id/d_back"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/pill_ghost"
             android:textColor="@color/k_ink"
-            android:textSize="17sp"
+            android:textSize="11sp"
             android:textStyle="bold"
-            android:paddingLeft="22dp"
-            android:paddingRight="22dp"
-            android:paddingTop="13dp"
-            android:paddingBottom="14dp"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="11dp"
             android:text="@string/det_back" />
         <View
             android:layout_width="0dp"
@@ -210,13 +176,13 @@
             android:layout_height="wrap_content"
             android:background="@drawable/pill_ghost"
             android:textColor="@color/k_ink"
-            android:textSize="20sp"
+            android:textSize="13sp"
             android:textStyle="bold"
             android:gravity="center"
-            android:paddingLeft="24dp"
-            android:paddingRight="24dp"
-            android:paddingTop="10dp"
-            android:paddingBottom="13dp"
+            android:paddingLeft="22dp"
+            android:paddingRight="22dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="10dp"
             android:text="@string/det_prev" />
         <TextView
             android:id="@+id/d_next"
@@ -225,12 +191,12 @@
             android:layout_marginStart="10dp"
             android:background="@drawable/pill_action"
             android:textColor="@color/k_ink"
-            android:textSize="17sp"
+            android:textSize="11sp"
             android:textStyle="bold"
-            android:paddingLeft="24dp"
-            android:paddingRight="24dp"
-            android:paddingTop="13dp"
-            android:paddingBottom="14dp"
+            android:paddingLeft="22dp"
+            android:paddingRight="22dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="11dp"
             android:text="@string/det_next" />
     </LinearLayout>
 </LinearLayout>

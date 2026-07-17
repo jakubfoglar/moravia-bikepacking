@@ -53,8 +53,6 @@
     <string name="det_lbl_detour">ODBOČKA</string>
     <string name="det_cash_only">Jen hotově</string>
     <string name="det_cards_ok">Karty berou</string>
-    <string name="det_maps_google">Google Maps</string>
-    <string name="det_maps_mapy">Mapy.cz</string>
 
     <string name="sketch_title">Nakresli něco</string>
     <string name="sketch_undo">Zpět</string>

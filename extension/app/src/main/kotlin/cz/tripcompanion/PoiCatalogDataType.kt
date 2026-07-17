@@ -18,12 +18,15 @@ class PoiCatalogDataType(extension: String) : DataTypeImpl(extension, "poi-catal
         Logger.log("catalog", "startView size=${config.viewSize} grid=${config.gridSize} preview=${config.preview}")
         val h = config.viewSize.second
         val w = config.viewSize.first
+        // In the page editor the field must be a static card: any click PendingIntent captures
+        // touch and blocks dragging the field, so preview renders with no click targets at all.
+        val preview = config.preview
         val job = CoroutineScope(Dispatchers.IO).launch {
             try {
                 PoiRepository.load(context)
                 AppState.flow.collect { st ->
                     try {
-                        emitter.updateView(render(context, st, h, w))
+                        emitter.updateView(render(context, st, h, w, preview))
                     } catch (e: Exception) {
                         Logger.logError("catalog render", e)
                         emitter.updateView(Render.error(context, "Catalog render", e))
@@ -37,16 +40,16 @@ class PoiCatalogDataType(extension: String) : DataTypeImpl(extension, "poi-catal
         emitter.setCancellable { job.cancel() }
     }
 
-    private fun render(context: Context, st: AppState.State, heightPx: Int, widthPx: Int): android.widget.RemoteViews {
+    private fun render(context: Context, st: AppState.State, heightPx: Int, widthPx: Int, preview: Boolean): android.widget.RemoteViews {
         val day = TripSettings.effectiveDay(context)
         val pois = PoiRepository.poisForDay(day)
         if (pois.isEmpty()) return Render.error(context, "Catalog", IllegalStateException("no POIs for day $day"))
         // A tiny slot has no paging buttons — it always tracks the nearest POI ahead.
         val tiny = heightPx in 1 until 160
 
-        if (!st.located || st.lat == null || st.lon == null) {
-            val idx = if (tiny) 0 else st.index.coerceIn(0, pois.size - 1)
-            return Render.card(context, pois[idx], idx + 1, pois.size, null, false, nearestMode = false, heightPx = heightPx, widthPx = widthPx)
+        if (preview || !st.located || st.lat == null || st.lon == null) {
+            val idx = if (tiny || preview) 0 else st.index.coerceIn(0, pois.size - 1)
+            return Render.card(context, pois[idx], idx + 1, pois.size, null, false, nearestMode = false, heightPx = heightPx, widthPx = widthPx, preview = preview)
         }
 
         val myKm = RouteMath.myRouteKm(st.lat, st.lon, PoiRepository.track)

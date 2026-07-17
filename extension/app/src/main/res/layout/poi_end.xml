@@ -10,7 +10,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="40sp"
+        android:textSize="26sp"
         android:text="🏁" />
     <TextView
         android:id="@+id/end_title"
@@ -19,7 +19,7 @@
         android:layout_marginTop="10dp"
         android:textColor="@color/k_ink"
         android:textStyle="bold"
-        android:textSize="18sp"
+        android:textSize="13sp"
         android:text="To je všech 79 míst" />
     <TextView
         android:layout_width="wrap_content"
@@ -27,7 +27,7 @@
         android:layout_marginTop="4dp"
         android:gravity="center"
         android:textColor="@color/k_muted"
-        android:textSize="14sp"
+        android:textSize="10sp"
         android:text="@string/fld_end_sub" />
     <TextView
         android:id="@+id/btn_prev"
@@ -37,7 +37,7 @@
         android:background="@drawable/pill_ghost"
         android:textColor="@color/k_ink"
         android:textStyle="bold"
-        android:textSize="15sp"
+        android:textSize="11sp"
         android:paddingLeft="22dp"
         android:paddingRight="22dp"
         android:paddingTop="14dp"

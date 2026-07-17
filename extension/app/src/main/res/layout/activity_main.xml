@@ -15,7 +15,7 @@
             android:layout_height="wrap_content"
             android:textColor="#14141A"
             android:textStyle="bold"
-            android:textSize="22sp"
+            android:textSize="15sp"
             android:text="@string/app_name" />
 
         <TextView
@@ -23,7 +23,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
             android:textColor="#5A5A60"
-            android:textSize="13sp"
+            android:textSize="10sp"
             android:text="Bikepacking · Břeclav → Otrokovice" />
 
         <!-- Update card -->
@@ -39,10 +39,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="#14141A"
-                android:textSize="14sp"
+                android:textSize="11sp"
                 android:text="Build 1" />
             <Button
                 android:id="@+id/btn_update"
+                android:textSize="12sp"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
                 android:layout_marginTop="12dp"
@@ -56,7 +57,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:textColor="#26262B"
-                android:textSize="13sp"
+                android:textSize="10sp"
                 android:text="" />
         </LinearLayout>
 
@@ -66,14 +67,14 @@
             android:layout_marginTop="20dp"
             android:textColor="#14141A"
             android:textStyle="bold"
-            android:textSize="15sp"
+            android:textSize="11sp"
             android:text="Setup" />
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:textColor="#5A5A60"
-            android:textSize="13sp"
+            android:textSize="10sp"
             android:lineSpacingExtra="2dp"
             android:text="Add “POI Catalog”, “Train Catcher” and “Day Overview” to ride pages, and “Next POI” to your map page. Works offline; update over WiFi." />
 
@@ -83,7 +84,7 @@
             android:layout_marginTop="20dp"
             android:textColor="#14141A"
             android:textStyle="bold"
-            android:textSize="15sp"
+            android:textSize="11sp"
             android:text="Trip day" />
         <TextView
             android:id="@+id/day_effective"
@@ -91,18 +92,18 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
             android:textColor="#5A5A60"
-            android:textSize="13sp"
+            android:textSize="10sp"
             android:text="Currently: Day 1" />
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_marginTop="6dp">
-            <Button android:id="@+id/day_auto" style="?android:attr/buttonBarButtonStyle"
+            <Button android:id="@+id/day_auto" style="?android:attr/buttonBarButtonStyle" android:textSize="11sp"
                 android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Auto" />
-            <Button android:id="@+id/day_1" style="?android:attr/buttonBarButtonStyle"
+            <Button android:id="@+id/day_1" style="?android:attr/buttonBarButtonStyle" android:textSize="11sp"
                 android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Day 1" />
-            <Button android:id="@+id/day_2" style="?android:attr/buttonBarButtonStyle"
+            <Button android:id="@+id/day_2" style="?android:attr/buttonBarButtonStyle" android:textSize="11sp"
                 android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Day 2" />
         </LinearLayout>
 
@@ -112,27 +113,30 @@
             android:layout_marginTop="20dp"
             android:textColor="#14141A"
             android:textStyle="bold"
-            android:textSize="15sp"
+            android:textSize="11sp"
             android:text="Features" />
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="#5A5A60"
-            android:textSize="12sp"
+            android:textSize="9sp"
             android:text="Turn parts off if anything misbehaves on the road. Radar/map take effect on the next start." />
         <Switch
             android:id="@+id/sw_radar"
+            android:textSize="11sp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:text="Radar Traffic (needs a rear radar)" />
         <Switch
             android:id="@+id/sw_map"
+            android:textSize="11sp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Map overlay: train-deadline pin" />
         <Switch
             android:id="@+id/sw_scenic"
+            android:textSize="11sp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Minimap: scenic area (Day 1)" />
@@ -144,16 +148,17 @@
             android:layout_marginTop="20dp"
             android:textColor="#14141A"
             android:textStyle="bold"
-            android:textSize="15sp"
+            android:textSize="11sp"
             android:text="@string/posting_head" />
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="#5A5A60"
-            android:textSize="12sp"
+            android:textSize="9sp"
             android:text="Ride events post themselves over the phone link — no WiFi needed. Paste the secret once." />
         <Switch
             android:id="@+id/sw_posting"
+            android:textSize="11sp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
@@ -165,22 +170,23 @@
             android:layout_marginTop="6dp"
             android:hint="@string/posting_secret_hint"
             android:inputType="textVisiblePassword"
-            android:textSize="13sp"
+            android:textSize="10sp"
             android:autofillHints="password" />
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_marginTop="4dp">
-            <Button android:id="@+id/btn_secret" style="?android:attr/buttonBarButtonStyle"
+            <Button android:id="@+id/btn_secret" style="?android:attr/buttonBarButtonStyle" android:textSize="11sp"
                 android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
                 android:text="@string/posting_save" />
-            <Button android:id="@+id/btn_testpost" style="?android:attr/buttonBarButtonStyle"
+            <Button android:id="@+id/btn_testpost" style="?android:attr/buttonBarButtonStyle" android:textSize="11sp"
                 android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
                 android:text="@string/posting_test" />
         </LinearLayout>
         <Button
             android:id="@+id/btn_sketch"
+            android:textSize="12sp"
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_marginTop="6dp"
@@ -194,7 +200,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:textColor="#26262B"
-            android:textSize="13sp"
+            android:textSize="10sp"
             android:text="" />
 
         <!-- Diagnostics -->
@@ -210,7 +216,7 @@
                 android:layout_weight="1"
                 android:textColor="#14141A"
                 android:textStyle="bold"
-                android:textSize="15sp"
+                android:textSize="11sp"
                 android:text="Diagnostics" />
             <Button
                 android:id="@+id/btn_copy"
@@ -219,7 +225,7 @@
                 android:layout_height="wrap_content"
                 android:textColor="#6A1B9A"
                 android:textStyle="bold"
-                android:textSize="13sp"
+                android:textSize="10sp"
                 android:text="Copy" />
             <Button
                 android:id="@+id/btn_share"
@@ -228,7 +234,7 @@
                 android:layout_height="wrap_content"
                 android:textColor="#6A1B9A"
                 android:textStyle="bold"
-                android:textSize="13sp"
+                android:textSize="10sp"
                 android:text="Share" />
         </LinearLayout>
 
@@ -240,7 +246,7 @@
             android:background="@drawable/log_bg"
             android:padding="12dp"
             android:fontFamily="monospace"
-            android:textSize="10sp"
+            android:textSize="8sp"
             android:textColor="#444444"
             android:text="(no logs yet)" />
 
@@ -251,7 +257,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:textColor="#5A5A60"
-            android:textSize="13sp"
+            android:textSize="10sp"
             android:text="Refresh" />
     </LinearLayout>
 </ScrollView>
