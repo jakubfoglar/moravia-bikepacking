@@ -1,109 +1,153 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:background="#FFFFFF">
 
-    <LinearLayout
+    <!-- Scrolling detail takes all space above the fixed nav bar. -->
+    <ScrollView
+        android:id="@+id/d_scroll"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-        <Button
-            android:id="@+id/d_back"
-            style="?android:attr/borderlessButtonStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="4dp"
-            android:textColor="#14141A"
-            android:textStyle="bold"
-            android:text="‹ Back" />
-
-        <ImageView
-            android:id="@+id/d_photo"
-            android:layout_width="match_parent"
-            android:layout_height="210dp"
-            android:scaleType="centerCrop"
-            android:contentDescription="@null" />
+        android:layout_height="0dp"
+        android:layout_weight="1">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="18dp">
+            android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/d_badge"
+            <Button
+                android:id="@+id/d_back"
+                style="?android:attr/borderlessButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="#6A1B9A"
-                android:textColor="#FFFFFF"
-                android:textSize="11sp"
-                android:textStyle="bold"
-                android:letterSpacing="0.06"
-                android:paddingLeft="9dp"
-                android:paddingRight="9dp"
-                android:paddingTop="3dp"
-                android:paddingBottom="3dp"
-                android:text="HISTORY" />
-
-            <TextView
-                android:id="@+id/d_name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
+                android:layout_margin="4dp"
                 android:textColor="#14141A"
-                android:textSize="22sp"
                 android:textStyle="bold"
-                android:text="Name" />
+                android:text="‹ Zpět na jízdu" />
 
-            <TextView
-                android:id="@+id/d_meta"
+            <ImageView
+                android:id="@+id/d_photo"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:textColor="#5A5A60"
-                android:textSize="13sp"
-                android:text="Town · Day 1" />
-
-            <TextView
-                android:id="@+id/d_hours"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:textColor="#2E7D32"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                android:text="" />
-
-            <TextView
-                android:id="@+id/d_blurb"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:textColor="#26262B"
-                android:textSize="16sp"
-                android:lineSpacingExtra="4dp"
-                android:text="" />
+                android:layout_height="210dp"
+                android:scaleType="centerCrop"
+                android:contentDescription="@null" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="18dp">
-                <Button
-                    android:id="@+id/d_maps"
-                    android:layout_width="0dp"
+                android:orientation="vertical"
+                android:padding="18dp">
+
+                <TextView
+                    android:id="@+id/d_badge"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Google Maps" />
-                <Button
-                    android:id="@+id/d_mapy"
-                    android:layout_width="0dp"
+                    android:background="#6A1B9A"
+                    android:textColor="#FFFFFF"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.06"
+                    android:paddingLeft="9dp"
+                    android:paddingRight="9dp"
+                    android:paddingTop="3dp"
+                    android:paddingBottom="3dp"
+                    android:text="HISTORY" />
+
+                <TextView
+                    android:id="@+id/d_name"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Mapy.cz" />
+                    android:layout_marginTop="10dp"
+                    android:textColor="#14141A"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:text="Name" />
+
+                <TextView
+                    android:id="@+id/d_meta"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textColor="#5A5A60"
+                    android:textSize="13sp"
+                    android:text="Town · Day 1" />
+
+                <TextView
+                    android:id="@+id/d_hours"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:textColor="#2E7D32"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:text="" />
+
+                <TextView
+                    android:id="@+id/d_blurb"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:textColor="#26262B"
+                    android:textSize="16sp"
+                    android:lineSpacingExtra="4dp"
+                    android:text="" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="18dp">
+                    <Button
+                        android:id="@+id/d_maps"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Google Maps" />
+                    <Button
+                        android:id="@+id/d_mapy"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Mapy.cz" />
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
+    </ScrollView>
+
+    <!-- Fixed browser bar: page through the catalog without leaving the detail. -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="#F2F2F4"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:paddingTop="6dp"
+        android:paddingBottom="6dp">
+        <Button
+            android:id="@+id/d_prev"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:text="‹ Předchozí" />
+        <TextView
+            android:id="@+id/d_count"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:textColor="#14141A"
+            android:textStyle="bold"
+            android:textSize="14sp"
+            android:text="1 / 1" />
+        <Button
+            android:id="@+id/d_next"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:text="Další ›" />
     </LinearLayout>
-</ScrollView>
+</LinearLayout>
