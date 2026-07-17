@@ -53,6 +53,18 @@ OnNavigationState → NavigatingRoute
 - **Caching:** device (filesDir, LRU); server catalog-by-corridor-hash; server **permanent per-entity enrichment cache** (a castle enriched once, forever, for every future route past it — this is what keeps "free" sustainable).
 - **Offline / link-drop:** built catalog is fully offline. Mid-build link drop → the *server* keeps building (async job); the device polls/retries; worst case the catalog arrives 40 km in. Photo fetch failure → category-tile fallback (already built).
 
+## Triggering & the build-progress UX
+
+**What the extension can see (verified — karoo-ext 1.1.9):** only the ten `On*` events. There is **no route-library or route-sync event** — the extension sees *only the route being actively navigated* (`OnNavigationState.NavigatingRoute`) and saved POI pins (`OnGlobalPOIs`). So:
+- **Auto-start on navigate: yes** (when the service is alive). The moment the rider starts navigating a route, `OnNavigationState` fires → the extension POSTs the route and starts the build *before* the rider opens our list/field. By the time they look, it's building or done. Requires the extension service to be bound — reliably true during a ride and when the field is placed on a page; whether it fires with the app fully closed / no field placed is device-dependent (**confirm on-device**), maximised by registering the consumer in `onCreate`.
+- **Sync-time / pre-processing the route library: no** — the SDK exposes no route-library access or sync event. We can't process routes sitting unopened in the library. The earliest reliable trigger is "starts navigating."
+- **Feels-instant strategy** (three layers): (1) auto-start on navigate so it's usually done before they look; (2) the corridor-hash cache — a route ridden before, by them or anyone, returns instantly; (3) home-WiFi preload if they start navigating at home.
+
+**The 30–60s build must feel alive (Apple-grade, never a dead spinner).** The build is async on the server; the device polls a status endpoint returning `{step, count, done, pct}` and reflects it live with *specific, moving, honest* messages — not a generic "Loading…":
+- Field (RemoteViews): a **determinate `ProgressBar`** (an allowed widget) + one changing step line: "Reading your route…" → "Finding places along the way…" → "Found 23 — looking them up…" → "Writing descriptions (14/23)…" → "Fetching photos…" → "Almost ready…".
+- List (full Activity): richer — the progress bar + step, and **progressive reveal**: places appear in the list and fill in with photo/paragraph as each completes, so the rider watches it build rather than waiting on a blank screen. This is the "wow".
+- Honest failure states, never a frozen bar: link drop → "Waiting for your phone…" (the server keeps building); a stall → a retry affordance. Every state renders; the field never goes black.
+
 ## The enrichment pipeline (per candidate)
 
 1. **Candidates.** `Tipy`: Overpass corridor query — simplify polyline (Douglas-Peucker ~150 m), one `around`-query over the coordinate chain for the tags that yielded good POIs in the trip set (viewpoints, observation towers/rozhledny, castles/ruins/monasteries, peaks, waterfalls, `wikidata`-tagged attractions, cafés/pubs/bakeries, water). `out center` + a hard node budget. `Na trase`: the route's `Symbol.POI`s directly (category already known).
