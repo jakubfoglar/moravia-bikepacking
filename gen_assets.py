@@ -74,6 +74,8 @@ for p in sel:
         "routeKm": rk, "offKm": p["off_km"],
         "hasPhoto": bool(p.get("photo_url")),
         "photo_url": p.get("photo_url"),
+        # optional practicalities (type-aware detail screen; null/missing = block hidden)
+        **{k: p[k] for k in ("cuisine","admission","effortNote","hoursNote","phone","cashOnly") if p.get(k) is not None},
     })
 out.sort(key=lambda x:x["routeKm"])
 json.dump([{k:v for k,v in o.items() if k!="photo_url"} for o in out],

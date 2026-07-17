@@ -50,9 +50,28 @@
   .endwrap { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:0 20px; }
   .endwrap .flag { font-size:40px; } .endwrap .et { font-size:18px; font-weight:700; margin-top:10px; } .endwrap .es { font-size:14px; color:var(--sec); margin-top:4px; }
   .errtitle { font-size:15px; font-weight:700; color:var(--food); } .errbody { font-size:13px; color:var(--ink2); margin-top:8px; line-height:1.4; }
-  .screen.next { padding:8px; } .nextrow { display:flex; align-items:center; }
-  .nphoto { width:52px; height:52px; border-radius:8px; object-fit:cover; flex:none; } .nbody { margin-left:10px; min-width:0; } .nname { font-size:15px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; } .ndist { font-size:14px; font-weight:700; }
-  .screen.nextsmall { padding:6px; } .nline { font-size:15px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  /* Karoo OS palette (from the Figma design system) + the tiered catalog / detail */
+  :root { --kink:#141414; --kmut:#8A8A8A; --kmut2:#5A5A5A; --kdiv:#E6E6E9; --kdiv2:#EDEDED;
+          --kyellow:#F7E440; --kred:#E8564E; --kaction:#A2B5BF; --kgreen:#2E7D32; }
+  .catlab { font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; }
+  .pillg { background:#fff; border:1px solid var(--kdiv); border-radius:60px; color:var(--kink); font-weight:700; }
+  .pilla { background:var(--kaction); border-radius:60px; color:var(--kink); font-weight:700; }
+  .navpill { font-size:20px; padding:6px 26px 10px; line-height:1; }
+  .screen.tiny { padding:4px 8px; } .tinyrow { display:flex; align-items:center; }
+  .tphoto { width:40px; height:40px; border-radius:8px; object-fit:cover; flex:none; }
+  .ttile { width:40px; height:40px; border-radius:8px; flex:none; display:flex; align-items:center; justify-content:center; font-size:17px; }
+  .tbody { margin-left:8px; min-width:0; } .tname { font-size:14px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--kink); } .tdist { font-size:13px; font-weight:700; color:var(--kmut2); }
+  /* detail screen */
+  .dtop { height:40px; display:flex; align-items:center; padding:0 14px; border-bottom:1px solid var(--kdiv); }
+  .dtop .ic { font-size:14px; } .dtop .ttl { font-size:15px; font-weight:700; letter-spacing:.04em; margin-left:8px; flex:1; } .dtop .cnt { font-size:12px; font-weight:700; color:var(--kmut); }
+  .dphoto { width:100%; height:130px; object-fit:cover; display:block; }
+  .dbody { padding:12px 14px 0; } .dname { font-size:20px; font-weight:700; color:var(--kink); line-height:1.15; } .dmeta { font-size:12px; color:var(--kmut); margin-top:3px; }
+  .dhours { font-size:18px; font-weight:700; margin-top:10px; } .dstory { font-size:14px; color:var(--kink); line-height:1.5; margin-top:10px; }
+  .drow { display:flex; padding:10px 14px; border-bottom:1px solid var(--kdiv2); } .drow .ric { width:38px; font-size:16px; padding-left:4px; }
+  .drow .rlab { font-size:10px; font-weight:700; letter-spacing:.08em; color:var(--kmut); } .drow .rval { font-size:14px; font-weight:700; color:var(--kink); margin-top:1px; } .drow .rnote { font-size:10px; color:var(--kmut); margin-top:1px; }
+  .dmaps { display:flex; gap:8px; padding:10px 14px 12px; } .dmaps > div { flex:1; text-align:center; font-size:12px; padding:9px 0; }
+  .dbar { display:flex; align-items:center; gap:8px; padding:9px 14px; border-top:1px solid var(--kdiv); }
+  .dbar .grow { flex:1; } .dbar > div:not(.grow) { font-size:13px; padding:8px 16px; }
   /* field (train / radar) */
   .field { padding:16px; } .flabel { font-size:10px; font-weight:700; letter-spacing:.06em; color:var(--sec); } .fhead { font-size:20px; font-weight:700; margin-top:4px; }
   .fnum { margin-top:12px; display:flex; align-items:baseline; } .fnumv { font-size:30px; font-weight:700; line-height:1; } .fnumu { font-size:14px; color:var(--sec); margin-left:4px; }
@@ -170,58 +189,99 @@
   </div>
 </div>
 
-<h2>📖 POI Catalog</h2>
+<h2>📖 POI Catalog — one responsive field (Czech, Karoo OS look)</h2>
+<p class="lede">One field, three tiers by slot height: TINY (&lt;160 px, e.g. on the map page — replaces the old "Next POI" field), MEDIUM (&lt;420 px) and FULL. Category is an uppercase coloured label, actions are Karoo pills (‹ ghost left, › blue-grey right, matching the hardware buttons). Eat/drink cards headline live hours ("Otevřeno do 20:00") instead of a fake story. Tap anywhere → detail.</p>
 <div class="gallery">
   <div>
     <div class="karoo"><div class="screen full">
       <div class="chrome"><div class="r1"><span class="t">0:12:15</span><span class="b">61% ▮</span><span class="clock">18:41</span></div><div class="r2"><span class="pin" style="background:var(--history)"></span><span class="lbl">POI CATALOG</span></div></div>
       <div class="pad">
         <div class="header"><img class="photo" src="https://commons.wikimedia.org/wiki/Special:FilePath/The_Buchlov_Castle.jpg">
-          <div class="info"><span class="badge" style="background:var(--history)">🏰 History</span><div class="name">Hrad Buchlov (Buchlov Castle)</div><div class="sub">Buchlovice · Day 1</div><div class="distband"><span class="distnum">3.0</span><span class="distunit">km</span></div></div></div>
-        <div class="divider"></div><div class="hook">Mighty royal Gothic castle crowning the Chřiby ridge.</div><div class="more" style="color:var(--history)">Full story ›</div><div class="spacer"></div>
-        <div class="nav"><div class="btn ghost">‹ Prev</div><div class="counter"><div class="clabel">NEAREST AHEAD</div><div class="cvalue">3 / 25</div></div><div class="btn primary">Next ›</div></div>
+          <div class="info"><span class="catlab" style="color:var(--history)">Památka</span><div class="name" style="font-size:19px; margin-top:4px;">Hrad Buchlov</div><div class="sub" style="color:var(--kmut)">Buchlovice · 1. den</div></div></div>
+        <div class="distband"><span class="distnum" style="font-size:34px;">3,0</span><span class="distunit" style="color:var(--kmut)">km</span></div>
+        <div class="divider"></div><div class="hook">Mohutný královský gotický hrad na hřebeni Chřibů.</div><div class="more" style="color:var(--kmut2)">Celý příběh ›</div><div class="spacer"></div>
+        <div class="nav"><div class="pillg navpill">‹</div><div class="counter"><div class="clabel" style="color:var(--kmut)">PŘED VÁMI</div><div class="cvalue">3 / 25</div></div><div class="pilla navpill">›</div></div>
       </div>
     </div></div>
-    <div class="cap">Card — glance</div>
-  </div>
-  <div>
-    <div class="karoo"><div class="screen full">
-      <div class="chrome"><div class="r1"><span class="t">0:12:20</span><span class="b">61% ▮</span><span class="clock">18:41</span></div><div class="r2"><span class="pin" style="background:var(--history)"></span><span class="lbl">POI CATALOG</span></div></div>
-      <div class="pad"><span class="badge" style="background:var(--history)">🏰 History</span>
-        <div class="name" style="-webkit-line-clamp:3; line-clamp:3; font-size:18px; margin-top:8px;">Hrad Buchlov (Buchlov Castle)</div>
-        <div class="meta">Buchlovice · Day 1 · 3.0 km</div><div class="divider"></div>
-        <div class="blurb">One of the oldest and best-preserved royal castles in Moravia, founded in the first half of the 13th century on a wooded hilltop above Buchlovice. Never conquered, it houses museum collections, an armoury and a famous hunting-trophy hall. The keep offers sweeping views over the Chřiby forests.</div>
-        <div class="spacer"></div><div class="backbtn">‹ Back</div></div>
-    </div></div>
-    <div class="cap">Reading pane</div>
+    <div class="cap">FULL <small>(≥ 420 px · sight)</small></div>
   </div>
   <div>
     <div class="karoo"><div class="screen full">
       <div class="chrome"><div class="r1"><span class="t">0:41:03</span><span class="b">54% ▮</span><span class="clock">12:30</span></div><div class="r2"><span class="pin" style="background:var(--food)"></span><span class="lbl">POI CATALOG</span></div></div>
       <div class="pad"><div class="header"><div class="tile" style="background:var(--food)">🍽</div>
-          <div class="info"><span class="badge" style="background:var(--food)">🍽 Food</span><div class="name">Kozlovna U hejtmana Šarovce</div><div class="sub">Uh. Hradiště · Day 2</div><div class="distband"><span class="distnum">300</span><span class="distunit">m</span></div></div></div>
-        <div class="divider"></div><div class="hook" style="color:var(--food); font-weight:600;">🕒 Mo–Th 11–23 · Fr–Sa 11–24 · Su 11–21</div><div class="more" style="color:var(--food)">Full story ›</div><div class="spacer"></div>
-        <div class="nav"><div class="btn ghost">‹ Prev</div><div class="counter"><div class="clabel">NEAREST AHEAD</div><div class="cvalue">1 / 26</div></div><div class="btn primary">Next ›</div></div></div>
+          <div class="info"><span class="catlab" style="color:var(--food)">Jídlo</span><div class="name" style="font-size:19px; margin-top:4px;">Kozlovna U hejtmana Šarovce</div><div class="sub" style="color:var(--kmut)">Uh. Hradiště · 2. den</div></div></div>
+        <div class="distband"><span class="distnum" style="font-size:34px;">300</span><span class="distunit" style="color:var(--kmut)">m</span></div>
+        <div class="divider"></div><div class="hook" style="color:var(--kgreen); font-weight:700;">Otevřeno do 23:00</div><div class="more" style="color:var(--kmut2)">Celý příběh ›</div><div class="spacer"></div>
+        <div class="nav"><div class="pillg navpill">‹</div><div class="counter"><div class="clabel" style="color:var(--kmut)">PŘED VÁMI</div><div class="cvalue">1 / 26</div></div><div class="pilla navpill">›</div></div></div>
     </div></div>
-    <div class="cap">Food — tile + hours</div>
+    <div class="cap">FULL <small>(eat/drink → live hours line)</small></div>
+  </div>
+  <div>
+    <div class="karoo"><div class="screen" style="height:200px;">
+      <div class="pad" style="padding:12px;">
+        <div class="header"><img class="photo" style="width:64px; height:64px;" src="https://commons.wikimedia.org/wiki/Special:FilePath/The_Buchlov_Castle.jpg">
+          <div class="info" style="margin-left:12px;"><span class="catlab" style="color:var(--history); font-size:10px;">Památka</span><div class="name" style="font-size:16px; margin-top:2px;">Hrad Buchlov</div></div></div>
+        <div class="hook" style="font-size:13px; margin-top:8px;">Mohutný královský gotický hrad na hřebeni Chřibů.</div><div class="spacer"></div>
+        <div class="nav"><div style="flex:1; font-size:21px; font-weight:700;">3,0 km</div><div class="pillg" style="font-size:17px; padding:4px 20px 8px;">‹</div><div class="pilla" style="font-size:17px; padding:4px 20px 8px; margin-left:8px;">›</div></div>
+      </div>
+    </div></div>
+    <div style="height:14px"></div>
+    <div class="karoo"><div class="screen tiny"><div class="tinyrow"><img class="tphoto" src="https://commons.wikimedia.org/wiki/Special:FilePath/The_Buchlov_Castle.jpg"><div class="tbody"><div class="tname">Hrad Buchlov</div><div class="tdist">za 3,0 km</div></div></div></div></div>
+    <div class="cap">MEDIUM &amp; TINY <small>(tiny = nearest ahead, for the map page)</small></div>
   </div>
   <div>
     <div class="karoo"><div class="screen full">
       <div class="chrome"><div class="r1"><span class="t">7:48:11</span><span class="b">21% ▮</span><span class="clock">18:40</span></div><div class="r2"><span class="pin" style="background:var(--nature)"></span><span class="lbl">POI CATALOG</span></div></div>
-      <div class="pad"><div class="endwrap"><div class="flag">🏁</div><div class="et">That's all 25 POIs</div><div class="es">Everything's behind you — nice riding.</div><div class="backbtn" style="margin-top:20px; padding:14px 22px;">‹ Back to first</div></div></div>
+      <div class="pad"><div class="endwrap"><div class="flag">🏁</div><div class="et">To je všech 25 míst</div><div class="es">Všechno už máte za sebou — pěkná jízda.</div><div class="pillg" style="margin-top:20px; padding:14px 22px; font-size:15px;">‹ Zpátky na první</div></div></div>
     </div></div>
-    <div class="cap">End of day</div>
+    <div class="cap">Konec dne</div>
   </div>
 </div>
 
-<h2>🧭 Next POI &amp; app screen</h2>
+<h2>📄 POI detail (Activity · Open Sans · type-aware)</h2>
+<p class="lede">A real full-screen page in the Karoo OS language: 53 px top bar with the category as title, hairline dividers, uppercase grey row labels with dark bold values, pills bottom-left (Zpět) and bottom-right (Další ›) aligned to the physical buttons. SIGHT reads story-first; EAT/DRINK is practical-first with a big live-hours verdict and no fake story. Every row hides when its data is absent.</p>
 <div class="gallery">
   <div>
-    <div class="karoo"><div class="screen next"><div class="nextrow"><img class="nphoto" src="https://commons.wikimedia.org/wiki/Special:FilePath/The_Buchlov_Castle.jpg"><div class="nbody"><div class="nname">Hrad Buchlov</div><div class="ndist">🏰 3.0 km</div></div></div></div></div>
-    <div style="height:14px"></div>
-    <div class="karoo"><div class="screen nextsmall"><div class="nline">🏰 3.0 km · Hrad Buchlov</div></div></div>
-    <div class="cap">Next POI — medium &amp; small</div>
+    <div class="karoo"><div class="screen" style="height:520px;">
+      <div class="dtop"><span class="ic">🏰</span><span class="ttl" style="color:var(--history)">PAMÁTKA</span><span class="cnt">2 / 25</span></div>
+      <img class="dphoto" src="https://commons.wikimedia.org/wiki/Special:FilePath/Lednice_(Eisgrub)_-_z%C3%A1mek.JPG">
+      <div class="dbody">
+        <div class="dname">Zámek Lednice</div>
+        <div class="dmeta">Lednice · 1. den · odbočka 1,7 km</div>
+        <div class="dstory">Letní sídlo Lichtenštejnů, v polovině 19. století přestavěné do romantické novogotiky po vzoru anglických tudorovských sídel. Uvnitř jsou bohatě vyřezávané dřevěné interiéry — slavné točité schodiště…</div>
+      </div>
+      <div style="border-top:1px solid var(--kdiv2); margin-top:10px;"></div>
+      <div class="drow"><div class="ric">🕒</div><div><div class="rlab">OTEVÍRACÍ DOBA</div><div class="rval" style="color:var(--kgreen)">Otevřeno do 17:00</div><div class="rnote">Mo-Su 09:00-17:00 · letní sezóna — ověřit</div></div></div>
+      <div class="drow"><div class="ric">🎟</div><div><div class="rlab">VSTUPNÉ</div><div class="rval">okruhy od cca 250 Kč · park zdarma</div></div></div>
+      <div class="drow"><div class="ric">📍</div><div><div class="rlab">ODBOČKA</div><div class="rval">1,7 km od trasy</div></div></div>
+      <div class="spacer"></div>
+      <div class="dbar"><div class="pillg">‹ Zpět</div><div class="grow"></div><div class="pillg">‹</div><div class="pilla">Další ›</div></div>
+    </div></div>
+    <div class="cap">SIGHT <small>(story-first · practical rows below)</small></div>
   </div>
+  <div>
+    <div class="karoo"><div class="screen" style="height:520px;">
+      <div class="dtop"><span class="ic">🍽</span><span class="ttl" style="color:var(--food)">JÍDLO</span><span class="cnt">1 / 26</span></div>
+      <div class="dbody">
+        <div class="dname">Lokálka</div>
+        <div class="dmeta">Břeclav · 1. den · odbočka 1,6 km</div>
+        <div class="dhours" style="color:var(--kgreen)">Otevřeno do 20:00</div>
+        <div class="dstory">Klasická břeclavská restaurace — otevřeno už od 7 ráno, hodí se na vydatnou snídani hned po startu.</div>
+      </div>
+      <div style="border-top:1px solid var(--kdiv2); margin-top:10px;"></div>
+      <div class="drow"><div class="ric">🕒</div><div><div class="rlab">OTEVÍRACÍ DOBA</div><div class="rval" style="font-size:12px;">Mo-Th 07:00-20:00; Fr,Sa 07:00-22:00; Su 08:00-20:00</div><div class="rnote">hodiny z OSM — ověřit</div></div></div>
+      <div class="drow"><div class="ric">🍽</div><div><div class="rlab">KUCHYNĚ</div><div class="rval">regionální</div></div></div>
+      <div class="drow"><div class="ric">📍</div><div><div class="rlab">ODBOČKA</div><div class="rval">1,6 km od trasy</div></div></div>
+      <div class="dmaps"><div class="pillg">Google Maps</div><div class="pillg">Mapy.cz</div></div>
+      <div class="spacer"></div>
+      <div class="dbar"><div class="pillg">‹ Zpět</div><div class="grow"></div><div class="pillg" style="opacity:.35">‹</div><div class="pilla">Další ›</div></div>
+    </div></div>
+    <div class="cap">EAT/DRINK <small>(practical-first · big hours verdict · honest note)</small></div>
+  </div>
+</div>
+
+<h2>📱 App screen</h2>
+<div class="gallery">
   <div>
     <div class="karoo"><div class="screen full" style="height:620px; overflow-y:auto;">
       <div class="app">

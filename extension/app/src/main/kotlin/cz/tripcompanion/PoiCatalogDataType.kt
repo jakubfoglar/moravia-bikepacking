@@ -8,7 +8,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-/** Full-page catalog field: nearest-first, along-route distance, glance-card ⇄ reading pane. */
+/**
+ * The single catalog field. Renders three tiers off the slot height (see Render.card):
+ * TINY = nearest-POI glance (for small slots, e.g. on the map page), MEDIUM = compact card,
+ * FULL = the rich browsable card. Nearest-first with along-route distances when located.
+ */
 class PoiCatalogDataType(extension: String) : DataTypeImpl(extension, "poi-catalog") {
     override fun startView(context: Context, config: ViewConfig, emitter: ViewEmitter) {
         Logger.log("catalog", "startView size=${config.viewSize} preview=${config.preview}")
@@ -36,16 +40,18 @@ class PoiCatalogDataType(extension: String) : DataTypeImpl(extension, "poi-catal
         val day = TripSettings.effectiveDay(context)
         val pois = PoiRepository.poisForDay(day)
         if (pois.isEmpty()) return Render.error(context, "Catalog", IllegalStateException("no POIs for day $day"))
+        // A tiny slot has no paging buttons — it always tracks the nearest POI ahead.
+        val tiny = heightPx in 1 until 160
 
         if (!st.located || st.lat == null || st.lon == null) {
-            val idx = st.index.coerceIn(0, pois.size - 1)
+            val idx = if (tiny) 0 else st.index.coerceIn(0, pois.size - 1)
             return Render.card(context, pois[idx], idx + 1, pois.size, null, false, nearestMode = false, heightPx = heightPx)
         }
 
         val myKm = RouteMath.myRouteKm(st.lat, st.lon, PoiRepository.track)
         val ahead = RouteMath.sortedAhead(pois, myKm)
-        if (ahead.isEmpty()) return Render.end(context, pois.size)
-        val idx = st.index.coerceIn(0, ahead.size - 1)
+        if (ahead.isEmpty()) return Render.end(context, pois.size, tiny)
+        val idx = if (tiny) 0 else st.index.coerceIn(0, ahead.size - 1)
         val a = ahead[idx]
         return Render.card(context, a.poi, idx + 1, ahead.size, a.remainingKm, true, nearestMode = true, heightPx = heightPx)
     }

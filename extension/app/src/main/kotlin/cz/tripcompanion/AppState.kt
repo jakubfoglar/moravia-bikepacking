@@ -4,16 +4,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 
-/** Shared, process-wide UI state: location, paging index, and card⇄reading mode. */
+/** Shared, process-wide UI state: location and the catalog's paging index. */
 object AppState {
-    enum class Mode { CARD, READING }
-
     data class State(
         val lat: Double? = null,
         val lon: Double? = null,
         val located: Boolean = false,
         val index: Int = 0,
-        val mode: Mode = Mode.CARD,
         val avgKmh: Double? = null,
         /** When the last fix arrived. A frozen position means "GPS lost", not "stopped". */
         val locAt: Long = 0L,
@@ -28,13 +25,9 @@ object AppState {
     fun updateAvg(kmh: Double) =
         _flow.update { it.copy(avgKmh = kmh) }
 
-    // Paging always returns to the glance card.
     fun move(delta: Int) =
-        _flow.update { it.copy(index = (it.index + delta).coerceAtLeast(0), mode = Mode.CARD) }
+        _flow.update { it.copy(index = (it.index + delta).coerceAtLeast(0)) }
 
     fun setIndex(i: Int) =
-        _flow.update { it.copy(index = i.coerceAtLeast(0), mode = Mode.CARD) }
-
-    fun setMode(m: Mode) =
-        _flow.update { it.copy(mode = m) }
+        _flow.update { it.copy(index = i.coerceAtLeast(0)) }
 }

@@ -6,6 +6,13 @@ import android.graphics.BitmapFactory
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
+/**
+ * Presentation type. The four categories collapse into two ways of reading a place:
+ * a SIGHT is story-first (photo → paragraph → practicalities), an EATDRINK stop is
+ * practical-first (am I fed? open? how far off route?) and gets no fake story.
+ */
+enum class PoiKind { SIGHT, EATDRINK }
+
 @Serializable
 data class Poi(
     val id: Int,
@@ -21,7 +28,22 @@ data class Poi(
     val routeKm: Double = 0.0,
     val offKm: Double = 0.0,
     val hasPhoto: Boolean = false,
-)
+    // ---- optional practicalities (content pass fills these in; every block hides when null) ----
+    /** Cleaned, Czech, comma-separated cuisine ("regionální, těstoviny") — EATDRINK only. */
+    val cuisine: String? = null,
+    /** Admission as display text — a range or "od …" when the exact price is unverified. */
+    val admission: String? = null,
+    /** Physical effort to actually see it ("302 schodů na ochoz", "1,5 km pěšky"). */
+    val effortNote: String? = null,
+    /** Caveat shown under the hours row ("letní sezóna — ověřit"). */
+    val hoursNote: String? = null,
+    val phone: String? = null,
+    /** true = jen hotově, false = karty berou, null = unknown (row hidden). */
+    val cashOnly: Boolean? = null,
+) {
+    val kind: PoiKind
+        get() = if (category == "food" || category == "cafe") PoiKind.EATDRINK else PoiKind.SIGHT
+}
 
 /** Loads the bundled POIs, combined track, and photos from assets (offline). */
 object PoiRepository {

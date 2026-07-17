@@ -14,13 +14,6 @@
         typeId="poi-catalog" />
 
     <DataType
-        description="@string/next_desc"
-        displayName="@string/next_name"
-        graphical="true"
-        icon="@drawable/ic_field"
-        typeId="poi-next" />
-
-    <DataType
         description="@string/train_desc"
         displayName="@string/train_name"
         graphical="true"

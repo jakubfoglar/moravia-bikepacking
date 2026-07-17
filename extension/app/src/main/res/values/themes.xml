@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.TripCompanion" parent="Theme.AppCompat.DayNight.NoActionBar" />
+    <style name="Theme.TripCompanion" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="android:fontFamily">@font/open_sans</item>
+    </style>
+
+    <!-- POI detail: always the white Karoo ride-UI look, never inverted by DayNight. -->
+    <style name="Theme.TripCompanion.PoiDetail" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:fontFamily">@font/open_sans</item>
+        <item name="android:windowBackground">@color/k_bg</item>
+    </style>
 </resources>

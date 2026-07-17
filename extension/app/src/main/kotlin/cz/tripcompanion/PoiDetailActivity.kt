@@ -3,17 +3,21 @@ package cz.tripcompanion
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
-import android.widget.Button
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 
 /**
- * Full-screen, scrollable POI browser. Opened by tapping the catalog card; Prev/Next page
- * through the same nearest-ahead list the field shows, so it's a modal browser rather than a
- * dead-end single card. Runs in its own task (see the manifest's empty taskAffinity), so Back
- * returns to the ride screen you came from — never the app's home screen.
+ * Full-screen, scrollable POI browser in the Karoo OS look (Open Sans, white, uppercase grey
+ * labels, pill actions where the physical buttons sit). Opened by tapping the catalog card;
+ * Prev/Next page through the same nearest-ahead list the field shows. Runs in its own task
+ * (see the manifest's empty taskAffinity), so Back returns to the ride screen you came from.
+ *
+ * Type-aware: a SIGHT reads story-first (photo → paragraph → practical rows), an EAT/DRINK
+ * stop reads practical-first (big live hours line → rows) and never shows a fake story.
  */
 class PoiDetailActivity : AppCompatActivity() {
     private var order: List<Poi> = emptyList()
@@ -24,9 +28,9 @@ class PoiDetailActivity : AppCompatActivity() {
         setContentView(R.layout.activity_poi_detail)
         PoiRepository.load(applicationContext)
 
-        findViewById<Button>(R.id.d_back).setOnClickListener { finish() }
-        findViewById<Button>(R.id.d_prev).setOnClickListener { step(-1) }
-        findViewById<Button>(R.id.d_next).setOnClickListener { step(1) }
+        findViewById<TextView>(R.id.d_back).setOnClickListener { finish() }
+        findViewById<TextView>(R.id.d_prev).setOnClickListener { step(-1) }
+        findViewById<TextView>(R.id.d_next).setOnClickListener { step(1) }
 
         buildOrder(intent.getIntExtra("id", -1))
         if (order.isEmpty()) { finish(); return }
@@ -64,12 +68,15 @@ class PoiDetailActivity : AppCompatActivity() {
 
     private fun bind() {
         val poi = order[idx]
-        val scroll = findViewById<View>(R.id.d_scroll)
-        scroll.scrollTo(0, 0) // new POI starts at the top, not wherever the last one was scrolled
+        findViewById<View>(R.id.d_scroll).scrollTo(0, 0)
 
-        val badge = findViewById<TextView>(R.id.d_badge)
-        badge.text = "${Render.catEmoji(poi.category)} ${Render.catLabel(poi.category)}"
-        badge.setBackgroundColor(Render.catColor(poi.category))
+        // Top bar: category as the screen title.
+        findViewById<TextView>(R.id.d_cat_icon).text = Render.catEmoji(poi.category)
+        findViewById<TextView>(R.id.d_title).apply {
+            text = Render.catLabel(this@PoiDetailActivity, poi.category)
+            setTextColor(Render.catColor(poi.category))
+        }
+        findViewById<TextView>(R.id.d_count).text = "${idx + 1} / ${order.size}"
 
         val photo = findViewById<ImageView>(R.id.d_photo)
         val bmp = if (poi.hasPhoto) PoiRepository.photo(this, poi.id) else null
@@ -80,27 +87,143 @@ class PoiDetailActivity : AppCompatActivity() {
         }
 
         findViewById<TextView>(R.id.d_name).text = poi.name
-        findViewById<TextView>(R.id.d_meta).text = "${poi.town} · Day ${poi.day} · ${poi.offKm} km off route"
+        findViewById<TextView>(R.id.d_meta).text = listOf(
+            poi.town.ifBlank { null },
+            getString(R.string.fld_day_n, poi.day),
+            detourText(poi),
+        ).filterNotNull().joinToString(" · ")
 
-        val hours = findViewById<TextView>(R.id.d_hours)
-        if (poi.opening_hours != null) {
-            hours.text = "🕒 ${poi.opening_hours}"; hours.visibility = View.VISIBLE
+        // Big live hours line — the headline of an EAT/DRINK stop.
+        val hoursBig = findViewById<TextView>(R.id.d_hours_big)
+        val status = if (poi.kind == PoiKind.EATDRINK) Render.hoursLine(this, poi.opening_hours) else null
+        if (status != null) {
+            hoursBig.text = status.first
+            hoursBig.setTextColor(status.second)
+            hoursBig.visibility = View.VISIBLE
         } else {
-            hours.visibility = View.GONE
+            hoursBig.visibility = View.GONE
         }
 
-        findViewById<TextView>(R.id.d_blurb).text = poi.blurb.ifBlank { poi.hook }
+        // Story (SIGHT) / optional honest note (EAT/DRINK) — machine-made filler never renders.
+        val blurb = findViewById<TextView>(R.id.d_blurb)
+        val story = when (poi.kind) {
+            PoiKind.SIGHT -> poi.blurb.ifBlank { poi.hook }
+            PoiKind.EATDRINK -> poi.blurb.takeUnless { it.isBlank() || looksMachineMade(it) } ?: ""
+        }
+        if (story.isBlank()) {
+            blurb.visibility = View.GONE
+        } else {
+            blurb.text = story
+            blurb.visibility = View.VISIBLE
+        }
 
-        findViewById<TextView>(R.id.d_count).text = "${idx + 1} / ${order.size}"
-        findViewById<Button>(R.id.d_prev).isEnabled = idx > 0
-        findViewById<Button>(R.id.d_next).isEnabled = idx < order.size - 1
+        bindRows(poi)
 
-        findViewById<Button>(R.id.d_maps).setOnClickListener {
+        findViewById<TextView>(R.id.d_prev).apply { isEnabled = idx > 0; alpha = if (idx > 0) 1f else 0.35f }
+        findViewById<TextView>(R.id.d_next).apply {
+            isEnabled = idx < order.size - 1
+            alpha = if (idx < order.size - 1) 1f else 0.35f
+        }
+
+        findViewById<TextView>(R.id.d_maps).setOnClickListener {
             open("https://www.google.com/maps/search/?api=1&query=${poi.lat},${poi.lon}")
         }
-        findViewById<Button>(R.id.d_mapy).setOnClickListener {
+        findViewById<TextView>(R.id.d_mapy).setOnClickListener {
             open("https://mapy.cz/turisticka?x=${poi.lon}&y=${poi.lat}&z=16")
         }
+    }
+
+    /** Practical rows, ordered by type; every row hides when its data is absent. */
+    private fun bindRows(poi: Poi) {
+        val rows = findViewById<LinearLayout>(R.id.d_rows)
+        rows.removeAllViews()
+
+        val hoursStatus = Render.hoursLine(this, poi.opening_hours)
+        // EAT/DRINK already headlines the live verdict — its row carries the weekly schedule.
+        // SIGHT gets the coloured verdict as the row value, schedule + caveat as the note.
+        val hoursValue: String?
+        val hoursColor: Int?
+        val hoursNote: String?
+        if (poi.kind == PoiKind.EATDRINK && hoursStatus != null) {
+            hoursValue = poi.opening_hours
+            hoursColor = null
+            hoursNote = poi.hoursNote
+        } else {
+            hoursValue = hoursStatus?.first ?: poi.opening_hours
+            hoursColor = hoursStatus?.second
+            hoursNote = listOfNotNull(
+                poi.opening_hours.takeIf { hoursStatus != null },
+                poi.hoursNote,
+            ).joinToString(" · ").ifBlank { null }
+        }
+        val payment = when (poi.cashOnly) {
+            true -> getString(R.string.det_cash_only)
+            false -> getString(R.string.det_cards_ok)
+            null -> null
+        }
+        val detour = getString(
+            R.string.det_detour_value,
+            Render.distText(poi.offKm.coerceAtLeast(0.0)),
+        ).takeIf { poi.offKm > 0.15 }
+
+        data class Row(val icon: String, val label: Int, val value: String?, val color: Int?, val note: String? = null)
+        val spec: List<Row> = when (poi.kind) {
+            PoiKind.EATDRINK -> listOf(
+                Row("🕒", R.string.det_lbl_hours, hoursValue, hoursColor, hoursNote),
+                Row("🍽", R.string.det_lbl_cuisine, poi.cuisine ?: cleanedCuisine(poi), null),
+                Row("💳", R.string.det_lbl_payment, payment, null),
+                Row("📞", R.string.det_lbl_phone, poi.phone, null),
+                Row("📍", R.string.det_lbl_detour, detour, null),
+            )
+            PoiKind.SIGHT -> listOf(
+                Row("🕒", R.string.det_lbl_hours, hoursValue, hoursColor, hoursNote),
+                Row("🎟", R.string.det_lbl_admission, poi.admission, null),
+                Row("🥾", R.string.det_lbl_effort, poi.effortNote, null),
+                Row("📞", R.string.det_lbl_phone, poi.phone, null),
+                Row("📍", R.string.det_lbl_detour, detour, null),
+            )
+        }
+
+        val inflater = LayoutInflater.from(this)
+        var any = false
+        for (r in spec) {
+            val value = r.value?.takeIf { it.isNotBlank() } ?: continue
+            val v = inflater.inflate(R.layout.row_detail, rows, false)
+            v.findViewById<TextView>(R.id.row_icon).text = r.icon
+            v.findViewById<TextView>(R.id.row_label).text = getString(r.label)
+            v.findViewById<TextView>(R.id.row_value).apply {
+                text = value
+                r.color?.let { setTextColor(it) }
+            }
+            v.findViewById<TextView>(R.id.row_note).apply {
+                if (r.note != null) { text = r.note; visibility = View.VISIBLE } else visibility = View.GONE
+            }
+            rows.addView(v)
+            rows.addView(divider())
+            any = true
+        }
+        findViewById<View>(R.id.d_rows_top_divider).visibility = if (any) View.VISIBLE else View.GONE
+    }
+
+    private fun divider(): View = View(this).apply {
+        layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 1)
+        setBackgroundColor(getColor(R.color.k_divider_soft))
+    }
+
+    private fun detourText(poi: Poi): String =
+        if (poi.offKm <= 0.15) getString(R.string.det_on_route)
+        else getString(R.string.det_detour, Render.distText(poi.offKm))
+
+    /** The OSM-derived filler blurbs ("Sit-down option… Hours from OpenStreetMap…") stay hidden. */
+    private fun looksMachineMade(s: String): Boolean =
+        s.contains("OpenStreetMap") || s.startsWith("Sit-down option") || s.contains("Cuisine:")
+
+    /** Until the content pass fills `cuisine`, salvage it from the machine hook ("regional;pasta — from OpenStreetMap"). */
+    private fun cleanedCuisine(poi: Poi): String? {
+        if (poi.kind != PoiKind.EATDRINK) return null
+        val raw = poi.hook.substringBefore("— from OpenStreetMap").trim().trimEnd('—').trim()
+        if (raw.isBlank() || raw == poi.hook) return null // hand-written hooks are not cuisine lists
+        return raw.replace(";", ", ")
     }
 
     private fun open(url: String) = try {

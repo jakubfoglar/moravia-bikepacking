@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The Karoo OS palette (from the Figma design system). Don't invent new colours. -->
+<resources>
+    <color name="k_bg">#FFFFFF</color>
+    <color name="k_ink">#141414</color>          <!-- values / body -->
+    <color name="k_muted">#8A8A8A</color>        <!-- section labels -->
+    <color name="k_muted_dark">#5A5A5A</color>
+    <color name="k_divider">#E6E6E9</color>
+    <color name="k_divider_soft">#EDEDED</color>
+    <color name="k_yellow">#F7E440</color>       <!-- Karoo signature accent -->
+    <color name="k_red">#E8564E</color>          <!-- destructive / urgent -->
+    <color name="k_action">#A2B5BF</color>       <!-- big action-button fill -->
+    <color name="k_green">#2E7D32</color>        <!-- "open now" -->
+</resources>

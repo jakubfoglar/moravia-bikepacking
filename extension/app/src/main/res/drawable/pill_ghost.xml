@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Secondary pill: white with a hairline border. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="@color/k_bg" />
+    <stroke android:width="1dp" android:color="@color/k_divider" />
+    <corners android:radius="60dp" />
+</shape>

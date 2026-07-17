@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center"
-    android:background="#FFFFFF"
+    android:background="@color/k_bg"
     android:padding="24dp">
 
     <TextView
@@ -17,30 +17,30 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:textColor="#14141A"
+        android:textColor="@color/k_ink"
         android:textStyle="bold"
         android:textSize="18sp"
-        android:text="That's all 79 POIs" />
+        android:text="To je všech 79 míst" />
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
         android:gravity="center"
-        android:textColor="#5A5A60"
+        android:textColor="@color/k_muted"
         android:textSize="14sp"
-        android:text="Everything's behind you — nice riding." />
+        android:text="@string/fld_end_sub" />
     <TextView
         android:id="@+id/btn_prev"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
-        android:background="@drawable/btn_ghost"
-        android:textColor="#14141A"
+        android:background="@drawable/pill_ghost"
+        android:textColor="@color/k_ink"
         android:textStyle="bold"
         android:textSize="15sp"
         android:paddingLeft="22dp"
         android:paddingRight="22dp"
         android:paddingTop="14dp"
         android:paddingBottom="14dp"
-        android:text="‹ Back to first" />
+        android:text="@string/fld_end_back" />
 </LinearLayout>

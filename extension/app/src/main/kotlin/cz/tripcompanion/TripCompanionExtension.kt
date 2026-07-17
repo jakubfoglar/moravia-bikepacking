@@ -31,7 +31,6 @@ class TripCompanionExtension : KarooExtension("trip-companion", "1.0") {
     override val types by lazy {
         listOf(
             PoiCatalogDataType(extension),
-            PoiNextDataType(extension),
             TrainCatcherDataType(extension),
             DayOverviewDataType(extension),
             RadarDataType(extension),

@@ -15,8 +15,10 @@ import android.view.View
 import android.widget.RemoteViews
 import java.util.Locale
 
-/** Builds all RemoteViews. Card = glance (hook only), Reading = full story, one tap apart. */
+/** Builds all RemoteViews. The catalog card renders in three tiers by field height. */
 object Render {
+    private val CS = Locale.forLanguageTag("cs")
+
     fun catColor(cat: String): Int = when (cat) {
         "history" -> Color.parseColor("#6A1B9A")
         "cafe" -> Color.parseColor("#E07B00")
@@ -31,29 +33,50 @@ object Render {
         else -> "🌄"
     }
 
-    fun catLabel(cat: String): String = when (cat) {
-        "history" -> "HISTORY"
-        "cafe" -> "CAFÉ"
-        "food" -> "FOOD"
-        else -> "NATURE"
-    }
+    fun catLabel(ctx: Context, cat: String): String = ctx.getString(
+        when (cat) {
+            "history" -> R.string.cat_history
+            "cafe" -> R.string.cat_cafe
+            "food" -> R.string.cat_food
+            else -> R.string.cat_nature
+        },
+    )
 
-    private fun pillRes(cat: String): Int = when (cat) {
-        "history" -> R.drawable.pill_history
-        "cafe" -> R.drawable.pill_cafe
-        "food" -> R.drawable.pill_food
-        else -> R.drawable.pill_nature
-    }
-
-    private fun distParts(km: Double): Pair<String, String> =
+    fun distParts(km: Double): Pair<String, String> =
         if (km < 1.0) Pair((km * 1000).toInt().toString(), "m")
-        else Pair(String.format(Locale.US, "%.1f", km), "km")
+        else Pair(String.format(CS, "%.1f", km), "km")
 
-    private fun distInline(remainingKm: Double?, located: Boolean): String {
-        if (!located || remainingKm == null) return "locating…"
-        val (n, u) = distParts(remainingKm)
+    fun distText(km: Double): String {
+        val (n, u) = distParts(km)
         return "$n $u"
     }
+
+    private fun distInline(ctx: Context, remainingKm: Double?, located: Boolean): String =
+        if (!located || remainingKm == null) ctx.getString(R.string.fld_gps)
+        else distText(remainingKm)
+
+    /**
+     * "Otevřeno do 20:00" (green) / "Zavírá v 20:00" (red, ≤45 min) / "Zavřeno · otevírá v 11:00"
+     * (grey) — or null when the spec is missing/unparseable.
+     */
+    fun hoursLine(ctx: Context, spec: String?): Pair<String, Int>? =
+        when (val st = OpeningHours.status(spec)) {
+            is OpeningHours.Status.Open ->
+                if (st.closingSoon && st.untilHm != null) {
+                    Pair(ctx.getString(R.string.hrs_closing_at, st.untilHm), ctx.getColor(R.color.k_red))
+                } else if (st.untilHm != null) {
+                    Pair(ctx.getString(R.string.hrs_open_until, st.untilHm), ctx.getColor(R.color.k_green))
+                } else {
+                    Pair(ctx.getString(R.string.hrs_open), ctx.getColor(R.color.k_green))
+                }
+            is OpeningHours.Status.Closed ->
+                if (st.opensHm != null) {
+                    Pair(ctx.getString(R.string.hrs_opens_at, st.opensHm), ctx.getColor(R.color.k_muted_dark))
+                } else {
+                    Pair(ctx.getString(R.string.hrs_closed), ctx.getColor(R.color.k_muted_dark))
+                }
+            OpeningHours.Status.Unknown -> null
+        }
 
     private fun rounded(ctx: Context, bmp: Bitmap): Bitmap = try {
         val r = 10f * ctx.resources.displayMetrics.density
@@ -103,21 +126,68 @@ object Render {
         }
     }
 
-    private fun setBadge(rv: RemoteViews, poi: Poi) {
-        rv.setTextViewText(R.id.badge, "${catEmoji(poi.category)} ${catLabel(poi.category)}")
-        rv.setInt(R.id.badge, "setBackgroundResource", pillRes(poi.category))
+    /** Category as a small uppercase label in the category colour (the Karoo row-label idiom). */
+    private fun setBadge(ctx: Context, rv: RemoteViews, poi: Poi) {
+        rv.setTextViewText(R.id.badge, catLabel(ctx, poi.category))
+        rv.setTextColor(R.id.badge, catColor(poi.category))
     }
 
-    // ---- Card (glance) ----
-    fun card(ctx: Context, poi: Poi, pos: Int, total: Int, remainingKm: Double?, located: Boolean, nearestMode: Boolean, heightPx: Int = 0): RemoteViews {
-        val rv = RemoteViews(ctx.packageName, R.layout.poi_catalog)
-        // Tapping anywhere on the card (outside the nav buttons) opens the full scrollable detail.
+    /** The one line under the header: live hours for eat/drink stops, the hook for sights. */
+    private fun hookText(ctx: Context, poi: Poi): Pair<String, Int> {
+        val ink = ctx.getColor(R.color.k_ink)
+        if (poi.kind == PoiKind.EATDRINK) {
+            hoursLine(ctx, poi.opening_hours)?.let { return it }
+            poi.cuisine?.let { return Pair(it, ink) }
+            // Machine hook ("regional;pasta — from OpenStreetMap") → salvage the cuisine part.
+            return Pair(poi.hook.substringBefore("— from OpenStreetMap").trim().replace(";", ", "), ink)
+        }
+        return Pair(poi.hook, ink)
+    }
+
+    // ---- Catalog card: TINY (<160 px) / MEDIUM (<420 px) / FULL, by field height ----
+    fun card(ctx: Context, poi: Poi, pos: Int, total: Int, remainingKm: Double?, located: Boolean, nearestMode: Boolean, heightPx: Int = 0): RemoteViews =
+        when {
+            heightPx in 1 until 160 -> cardTiny(ctx, poi, remainingKm, located)
+            heightPx in 160 until 420 -> cardMedium(ctx, poi, remainingKm, located)
+            else -> cardFull(ctx, poi, pos, total, remainingKm, located, nearestMode)
+        }
+
+    private fun cardTiny(ctx: Context, poi: Poi, remainingKm: Double?, located: Boolean): RemoteViews {
+        val rv = RemoteViews(ctx.packageName, R.layout.poi_catalog_tiny)
         rv.setOnClickPendingIntent(R.id.card_root, pendingDetail(ctx, poi.id))
-        val compact = heightPx in 1..420 // short field → drop the overflow-prone middle
         setPhoto(ctx, rv, poi)
-        setBadge(rv, poi)
         rv.setTextViewText(R.id.name, poi.name)
-        rv.setTextViewText(R.id.sub, "${poi.town} · Day ${poi.day}")
+        rv.setTextViewText(
+            R.id.dist,
+            if (located && remainingKm != null) ctx.getString(R.string.fld_in_dist, distText(remainingKm))
+            else ctx.getString(R.string.fld_gps),
+        )
+        return rv
+    }
+
+    private fun cardMedium(ctx: Context, poi: Poi, remainingKm: Double?, located: Boolean): RemoteViews {
+        val rv = RemoteViews(ctx.packageName, R.layout.poi_catalog_medium)
+        rv.setOnClickPendingIntent(R.id.card_root, pendingDetail(ctx, poi.id))
+        setPhoto(ctx, rv, poi)
+        setBadge(ctx, rv, poi)
+        rv.setTextViewText(R.id.name, poi.name)
+        val (hook, hookColor) = hookText(ctx, poi)
+        rv.setTextViewText(R.id.hook, hook)
+        rv.setTextColor(R.id.hook, hookColor)
+        rv.setTextViewText(R.id.dist, distInline(ctx, remainingKm, located))
+        rv.setOnClickPendingIntent(R.id.btn_prev, pendingNav(ctx, "prev", 1))
+        rv.setOnClickPendingIntent(R.id.btn_next, pendingNav(ctx, "next", 2))
+        return rv
+    }
+
+    private fun cardFull(ctx: Context, poi: Poi, pos: Int, total: Int, remainingKm: Double?, located: Boolean, nearestMode: Boolean): RemoteViews {
+        val rv = RemoteViews(ctx.packageName, R.layout.poi_catalog)
+        // Tapping anywhere on the card (outside the nav buttons) opens the full detail.
+        rv.setOnClickPendingIntent(R.id.card_root, pendingDetail(ctx, poi.id))
+        setPhoto(ctx, rv, poi)
+        setBadge(ctx, rv, poi)
+        rv.setTextViewText(R.id.name, poi.name)
+        rv.setTextViewText(R.id.sub, "${poi.town} · ${ctx.getString(R.string.fld_day_n, poi.day)}")
 
         if (located && remainingKm != null) {
             rv.setViewVisibility(R.id.dist_band, View.VISIBLE)
@@ -130,92 +200,43 @@ object Render {
             rv.setViewVisibility(R.id.gps_band, View.VISIBLE)
         }
 
-        // Food shows hours on the card; everything else shows the hook.
-        if (poi.category == "food" && poi.opening_hours != null) {
-            rv.setTextViewText(R.id.hook, "🕒 ${poi.opening_hours}")
-            rv.setTextColor(R.id.hook, catColor(poi.category))
-        } else {
-            rv.setTextViewText(R.id.hook, poi.hook)
-            rv.setTextColor(R.id.hook, Color.parseColor("#26262B"))
-        }
+        val (hook, hookColor) = hookText(ctx, poi)
+        rv.setTextViewText(R.id.hook, hook)
+        rv.setTextColor(R.id.hook, hookColor)
 
         val hasMore = poi.blurb.isNotBlank() && poi.blurb != poi.hook
         if (hasMore) {
             rv.setViewVisibility(R.id.more, View.VISIBLE)
-            rv.setTextViewText(R.id.more, "Full story ›")
-            rv.setTextColor(R.id.more, catColor(poi.category))
             rv.setOnClickPendingIntent(R.id.more, pendingDetail(ctx, poi.id))
         } else {
             rv.setViewVisibility(R.id.more, View.GONE)
         }
 
-        if (compact) {
-            rv.setViewVisibility(R.id.divider, View.GONE)
-            rv.setViewVisibility(R.id.hook, View.GONE)
-            rv.setViewVisibility(R.id.more, View.GONE)
-        }
-        rv.setTextViewText(R.id.cnt_label, if (nearestMode) "NEAREST AHEAD" else "ROUTE ORDER")
+        rv.setTextViewText(
+            R.id.cnt_label,
+            ctx.getString(if (nearestMode) R.string.fld_order_ahead else R.string.fld_order_route),
+        )
         rv.setTextViewText(R.id.cnt_value, "$pos / $total")
         rv.setOnClickPendingIntent(R.id.btn_prev, pendingNav(ctx, "prev", 1))
         rv.setOnClickPendingIntent(R.id.btn_next, pendingNav(ctx, "next", 2))
         return rv
     }
 
-    // ---- Reading (full story) ----
-    fun reading(ctx: Context, poi: Poi, remainingKm: Double?, located: Boolean): RemoteViews {
-        val rv = RemoteViews(ctx.packageName, R.layout.poi_reading)
-        setBadge(rv, poi)
-        rv.setTextViewText(R.id.name, poi.name)
-        rv.setTextViewText(R.id.meta, "${poi.town} · Day ${poi.day} · ${distInline(remainingKm, located)}")
-        if (poi.opening_hours != null) {
-            rv.setViewVisibility(R.id.hours, View.VISIBLE)
-            rv.setTextViewText(R.id.hours, "🕒 ${poi.opening_hours}")
-        } else {
-            rv.setViewVisibility(R.id.hours, View.GONE)
-        }
-        rv.setTextViewText(R.id.blurb, poi.blurb.ifBlank { poi.hook })
-        rv.setOnClickPendingIntent(R.id.btn_back, pendingNav(ctx, "back", 5))
-        return rv
-    }
-
     // ---- End (all passed) ----
-    fun end(ctx: Context, total: Int): RemoteViews {
-        val rv = RemoteViews(ctx.packageName, R.layout.poi_end)
-        rv.setTextViewText(R.id.end_title, "That's all $total POIs")
-        rv.setOnClickPendingIntent(R.id.btn_prev, pendingNav(ctx, "reset", 3))
-        return rv
-    }
-
-    // ---- Next POI (compact) ----
-    fun next(ctx: Context, poi: Poi?, remainingKm: Double?, located: Boolean, heightPx: Int): RemoteViews {
-        val small = heightPx in 1 until 140
-        return if (small) nextSmall(ctx, poi, remainingKm, located) else nextMedium(ctx, poi, remainingKm, located)
-    }
-
-    private fun nextMedium(ctx: Context, poi: Poi?, remainingKm: Double?, located: Boolean): RemoteViews {
-        val rv = RemoteViews(ctx.packageName, R.layout.poi_next)
-        if (poi == null) {
+    fun end(ctx: Context, total: Int, tiny: Boolean = false): RemoteViews {
+        if (tiny) {
+            val rv = RemoteViews(ctx.packageName, R.layout.poi_catalog_tiny)
             rv.setViewVisibility(R.id.photo, View.GONE)
             rv.setViewVisibility(R.id.tile, View.VISIBLE)
-            rv.setInt(R.id.tile, "setBackgroundColor", Color.parseColor("#888888"))
+            rv.setInt(R.id.tile, "setBackgroundColor", ctx.getColor(R.color.k_muted))
             rv.setTextViewText(R.id.tile, "🏁")
-            rv.setTextViewText(R.id.name, "All POIs done")
+            rv.setTextViewText(R.id.name, ctx.getString(R.string.fld_end_title, total))
             rv.setTextViewText(R.id.dist, "")
             return rv
         }
-        setPhoto(ctx, rv, poi)
-        rv.setTextViewText(R.id.name, poi.name)
-        rv.setTextViewText(R.id.dist, "${catEmoji(poi.category)} ${distInline(remainingKm, located)}")
-        return rv
-    }
-
-    private fun nextSmall(ctx: Context, poi: Poi?, remainingKm: Double?, located: Boolean): RemoteViews {
-        val rv = RemoteViews(ctx.packageName, R.layout.poi_next_small)
-        rv.setTextViewText(
-            R.id.line,
-            if (poi == null) "🏁 All POIs done"
-            else "${catEmoji(poi.category)} ${distInline(remainingKm, located)} · ${poi.name}",
-        )
+        val rv = RemoteViews(ctx.packageName, R.layout.poi_end)
+        rv.setTextViewText(R.id.end_title, ctx.getString(R.string.fld_end_title, total))
+        rv.setOnClickPendingIntent(R.id.btn_prev, pendingNav(ctx, "reset", 3))
         return rv
     }
 
@@ -432,10 +453,10 @@ object Render {
     // ---- Error ----
     fun error(ctx: Context, where: String, e: Throwable): RemoteViews {
         val rv = RemoteViews(ctx.packageName, R.layout.poi_error)
-        rv.setTextViewText(R.id.err_title, "⚠ $where")
+        rv.setTextViewText(R.id.err_title, ctx.getString(R.string.fld_err_title, where))
         rv.setTextViewText(
             R.id.err_body,
-            "${e.javaClass.simpleName}: ${e.message}\n\nOpen Trip Companion → Share logs.",
+            "${e.javaClass.simpleName}: ${e.message}\n\n${ctx.getString(R.string.fld_err_hint)}",
         )
         return rv
     }

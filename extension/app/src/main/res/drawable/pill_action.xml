@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The native Karoo primary action: blue-grey pill, big radius. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="@color/k_action" />
+    <corners android:radius="60dp" />
+</shape>

@@ -2,16 +2,59 @@
 <resources>
     <string name="app_name">Trip Companion</string>
     <string name="catalog_name">POI Catalog</string>
-    <string name="catalog_desc">Swipe through your trip\'s points of interest — photo, info and along-route distance.</string>
-    <string name="next_name">Next POI</string>
-    <string name="next_desc">The nearest upcoming point of interest ahead on your route.</string>
+    <string name="catalog_desc">Points of interest along the route — adapts to field size, from a one-line glance to a full card.</string>
     <string name="train_name">Train Catcher</string>
     <string name="train_desc">Can you still make the train home? Required pace vs your live average.</string>
     <string name="overview_name">Day Overview</string>
     <string name="overview_desc">A minimap of today\'s whole route with your position and distance to the end.</string>
     <string name="radar_name">Radar Traffic</string>
     <string name="radar_desc">Cars passed, closest range and estimated speed from a rear radar. Enable in the app.</string>
-    <string name="about_text">Trip Companion\n\nAdd the \"POI Catalog\" data field to a full-size ride page, and \"Next POI\" to your map page.\n\nEverything works offline — 79 POIs and photos are bundled.\n\nRoute: Břeclav → Velehrad → Otrokovice.</string>
+    <string name="about_text">Trip Companion\n\nAdd the \"POI Catalog\" data field to any ride page — it adapts to its slot, so a small one on the map page works as a next-POI glance and a full-page one as the catalog.\n\nEverything works offline — 79 POIs and photos are bundled.\n\nRoute: Břeclav → Velehrad → Otrokovice.</string>
+
+    <!-- ==== POI categories (Czech) ==== -->
+    <string name="cat_history">PAMÁTKA</string>
+    <string name="cat_nature">PŘÍRODA</string>
+    <string name="cat_cafe">KAVÁRNA</string>
+    <string name="cat_food">JÍDLO</string>
+
+    <!-- ==== POI catalog field ==== -->
+    <string name="fld_gps">hledám GPS…</string>
+    <string name="fld_order_ahead">PŘED VÁMI</string>
+    <string name="fld_order_route">POŘADÍ NA TRASE</string>
+    <string name="fld_full_story">Celý příběh ›</string>
+    <string name="fld_in_dist">za %s</string>
+    <string name="fld_day_n">%d. den</string>
+    <string name="fld_end_title">To je všech %d míst</string>
+    <string name="fld_end_sub">Všechno už máte za sebou — pěkná jízda.</string>
+    <string name="fld_end_back">‹ Zpátky na první</string>
+    <string name="fld_err_title">⚠ %s</string>
+    <string name="fld_err_hint">Otevři Trip Companion → Sdílet logy.</string>
+
+    <!-- ==== opening-hours status ==== -->
+    <string name="hrs_open_until">Otevřeno do %s</string>
+    <string name="hrs_open">Otevřeno</string>
+    <string name="hrs_closing_at">Zavírá v %s</string>
+    <string name="hrs_closed">Zavřeno</string>
+    <string name="hrs_opens_at">Zavřeno · otevírá v %s</string>
+
+    <!-- ==== POI detail ==== -->
+    <string name="det_back">‹ Zpět</string>
+    <string name="det_prev">‹</string>
+    <string name="det_next">Další ›</string>
+    <string name="det_on_route">na trase</string>
+    <string name="det_detour">odbočka %s</string>
+    <string name="det_detour_value">%s od trasy</string>
+    <string name="det_lbl_hours">OTEVÍRACÍ DOBA</string>
+    <string name="det_lbl_admission">VSTUPNÉ</string>
+    <string name="det_lbl_effort">NÁROČNOST</string>
+    <string name="det_lbl_cuisine">KUCHYNĚ</string>
+    <string name="det_lbl_payment">PLATBA</string>
+    <string name="det_lbl_phone">TELEFON</string>
+    <string name="det_lbl_detour">ODBOČKA</string>
+    <string name="det_cash_only">Jen hotově</string>
+    <string name="det_cards_ok">Karty berou</string>
+    <string name="det_maps_google">Google Maps</string>
+    <string name="det_maps_mapy">Mapy.cz</string>
 
     <string name="sketch_title">Nakresli něco</string>
     <string name="sketch_undo">Zpět</string>
