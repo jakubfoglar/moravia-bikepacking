@@ -395,3 +395,15 @@ about the plain rows that remain.
 - Free enrichment: Wikidata P762/P571/P1435/P2048/P373; wikivoyage-listings (github.com/baturin/wikivoyage-listings); Commons API:Geosearch; NPÚ pamatkovykatalog.cz/openData, geoportal.npu.cz/opendata, heritage.toolforge.org.
 - Legal: EU DSM Directive Art. 3/4 (machine-readable opt-out; Hamburg court Dec 2025); CJEU *Renckhoff* C-161/17 (hotlinking); Meta automated-collection ToS.
 - Prior docs: `waybook-monetization.md`, `waybook-google-places-discovery.md`, `guidebook-extension-research.md`, `waybook-future-ideas.md`, `waybook-v1-spec.md`.
+
+---
+
+## Owner priority (2026-07-17): venue websites as a first-class enrichment source
+
+Elevate "read the venue's own website" from a café-hours tactic to a **general enrichment source** for ANY place that has an OSM `website`/`contact:website` tag (cafés, restaurants, small museums, wineries, rozhledny, attractions). The site often carries what no free dataset does — hours, **specialities / what they're known for**, admission, seasonal notes, a one-line self-description — and it feeds directly into the LLM summary.
+
+Approach (P7):
+- Via Anthropic **`web_fetch`** (no per-use fee, runs on Haiku, the URL is already in-context from the OSM tag) → ~$0.003/place, **cheaper than a web_search**. JSON-LD/schema.org first, then main text; robots-respecting; skip Facebook/Instagram/aggregator URLs; short timeout, best-effort (link rot / JS-only sites degrade to whatever else we have).
+- Fold the extracted facts into the SAME batched paragraph pass (hours → the practical row; specialities/description → enrich the blurb or the café's note). **Facts only** — do NOT copy site photos (copyright) or long verbatim text; attribute as "from the venue's website" where a fact is surfaced.
+- Order in the free ladder: for a place with a `website` tag, try `web_fetch` **before** paid `web_search` — it's cheaper and often better for exactly the places search would target.
+- Cache the fetched facts permanently per entity (like all other enrichment), keyed so a dead/updated link re-fetches occasionally rather than every build.
