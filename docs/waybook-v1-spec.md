@@ -83,7 +83,8 @@ OnNavigationState → NavigatingRoute
 - **Map layer:** `Symbol.POI` markers for the catalog, Layers toggle.
 - **Detail additions:** "Navigovat sem" (`LaunchPinDrop`), attribution line (OSM / Wikipedia / photo credit).
 - **Preload + offline cache** in `filesDir` (atomic write-then-rename; never a half-catalog), **photo fetch + LRU cache** direct from Commons.
-- **Settings:** build trigger (auto-on-WiFi toggle, default off), locale, attribution/about, Ko-fi link.
+- **Settings:** build trigger (auto-on-WiFi toggle, default off), locale, attribution/about, Ko-fi link, **Report a problem** (prefilled GitHub issue on the public repo, or a backend POST with opt-in logs).
+- **Dismiss a discovered POI:** on the `Tipy` list, **swipe-to-delete** (RecyclerView + `ItemTouchHelper`, matching the native Karoo swipe feel) to remove a suggestion that isn't interesting. Removing it persists a per-catalog *hidden* set in filesDir and also **drops its map marker** (the map layer reads the same filtered catalog), so the list and the map stay consistent. Undo snackbar. (The list becomes a RecyclerView for this.)
 
 **Drop entirely:** baked POIs, Train Catcher, Day Overview, Radar, Ride Narrator, follow-website, Sketch, the day concept.
 
