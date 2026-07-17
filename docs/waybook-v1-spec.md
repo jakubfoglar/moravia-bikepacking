@@ -16,6 +16,7 @@ Grounded in `docs/guidebook-extension-research.md` (the feasibility research —
 | Data source | Free open stack only — OSM/Overpass + Wikidata/Wikipedia/Wikivoyage/Commons. Commercial maps (Google, Mapy) are legally closed to an offline cache — see research §Google/Mapy. |
 | Offline | Preload the whole catalog + photos at home on WiFi; Companion-link fallback (≤100 KB/req) on the road; cached in `filesDir` forever after. |
 | Timeline | **Full v1 before the trip (~2 weeks)**, dogfooded on the ride. Aggressive; sequenced to de-risk (below). |
+| Language | **English** throughout — all UI strings and all LLM-generated paragraphs (this is an international product, unlike the Czech trip extension). Locale-aware paragraphs are a post-v1 nicety; English is the default and the v1 target. |
 | Licence | Code **MIT**; data attributed (OSM ODbL, Wikipedia/Wikivoyage CC BY-SA, Commons per-file). |
 | Monetisation | Free. Unobtrusive Ko-fi / GitHub Sponsors link only. No accounts, no billing in v1. |
 
